@@ -6,13 +6,18 @@
     ],
     "module": "ESNext",
     "skipLibCheck": true,
+    /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true, // 新增这一行
+    "noEmit": true, // 关键：加上这行，TypeScript 就不会再报错了
     "isolatedModules": true,
     "moduleDetection": "force",
     "composite": true,
-    "strict": true
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
   },
   "include": [
     "vite.config.ts"
