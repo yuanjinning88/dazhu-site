@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-bg-primary text-text-primary;
+    font-family:
+      'SF Pro Display',
+      'PingFang SC',
+      system-ui,
+      sans-serif;
+  }
+
+  ::selection {
+    background: rgba(0, 113, 227, 0.15);
+    color: #1D1D1F;
+  }
+}
+
+@layer components {
+  .section-padding {
+    @apply py-20 md:py-28;
+  }
+
+  .content-width {
+    @apply mx-auto max-w-content px-5 md:px-8;
+  }
+}
