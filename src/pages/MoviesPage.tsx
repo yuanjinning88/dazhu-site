@@ -46,7 +46,7 @@ function AddMovieForm({ onClose, onAdded }: { onClose: () => void; onAdded: () =
               {[5, 4, 3, 2, 1].map((n) => <option key={n} value={n}>{'⭐'.repeat(n)}</option>)}
             </select>
           </div>
-          <input className="w-full px-3 py-2 rounded-lg border border-border text-sm" placeholder="豆瓣链接（用于获取封面）" value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} />
+          <input className="w-full px-3 py-2 rounded-lg border border-border text-sm" placeholder="豆瓣链接" value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} />
           <input className="w-full px-3 py-2 rounded-lg border border-border text-sm" placeholder="观看路径（选填）" value={form.watchUrl} onChange={(e) => setForm({ ...form, watchUrl: e.target.value })} />
           <textarea className="w-full px-3 py-2 rounded-lg border border-border text-sm resize-none" rows={3} placeholder="短评" value={form.review} onChange={(e) => setForm({ ...form, review: e.target.value })} />
         </div>
@@ -110,7 +110,7 @@ function EditMovieForm({ item, onClose, onUpdated }: { item: import('@/hooks/use
               {[5, 4, 3, 2, 1].map((n) => <option key={n} value={n}>{'⭐'.repeat(n)}</option>)}
             </select>
           </div>
-          <input className="w-full px-3 py-2 rounded-lg border border-border text-sm" placeholder="豆瓣链接（用于获取封面）" value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} />
+          <input className="w-full px-3 py-2 rounded-lg border border-border text-sm" placeholder="豆瓣链接" value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} />
           <input className="w-full px-3 py-2 rounded-lg border border-border text-sm" placeholder="观看路径（选填）" value={form.watchUrl} onChange={(e) => setForm({ ...form, watchUrl: e.target.value })} />
           <textarea className="w-full px-3 py-2 rounded-lg border border-border text-sm resize-none" rows={3} placeholder="短评" value={form.review} onChange={(e) => setForm({ ...form, review: e.target.value })} />
         </div>
