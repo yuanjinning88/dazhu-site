@@ -15,7 +15,7 @@ function AddMovieForm({ onClose, onAdded }: { onClose: () => void; onAdded: () =
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-    const { url } = await searchMovieCover(form.link);
+    const { url } = await searchMovieCover(form.titleZh);
     await addMovie({
       title: form.titleZh,
       titleZh: form.titleZh,
@@ -76,8 +76,8 @@ function EditMovieForm({ item, onClose, onUpdated }: { item: import('@/hooks/use
     setSaving(true);
 
     let coverUrl = item.coverUrl;
-    if (form.link && form.link !== (item.link || '')) {
-      const { url } = await searchMovieCover(form.link);
+    if (form.titleZh !== item.titleZh) {
+      const { url } = await searchMovieCover(form.titleZh);
       if (url) coverUrl = url;
     }
 
