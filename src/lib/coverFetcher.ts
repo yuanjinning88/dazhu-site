@@ -1,14 +1,12 @@
 /**
- * 从公开 API 搜索专辑/电影封面。
+ * 搜索专辑/电影封面。
  * 音乐：iTunes（US 区）→ Cover Art Archive 双重兜底，均无需 Key
- * 电影：TMDB（需免费 Key）
+ * 电影：Cloudflare Pages Function 服务端抓取豆瓣页面 og:image
  */
-
-const TMDB_KEY = import.meta.env.VITE_TMDB_API_KEY || '';
 
 export interface CoverResult {
   url: string | null;
-  source: 'itunes' | 'coverart' | 'tmdb' | 'none';
+  source: 'itunes' | 'coverart' | 'douban' | 'none';
 }
 
 async function tryItunes(artist: string, album: string): Promise<string | null> {
@@ -65,18 +63,14 @@ export async function searchMusicCover(artist: string, album: string): Promise<C
   return { url: null, source: 'none' };
 }
 
-export async function searchMovieCover(title: string): Promise<CoverResult> {
-  if (!TMDB_KEY) return { url: null, source: 'none' };
-  const query = encodeURIComponent(title);
+export async function searchMovieCover(doubanUrl: string): Promise<CoverResult> {
+  if (!doubanUrl) return { url: null, source: 'none' };
   try {
-    const res = await fetch(
-      `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_KEY}&query=${query}&language=zh-CN`,
-    );
+    const endpoint = `/api/douban-cover?url=${encodeURIComponent(doubanUrl)}`;
+    const res = await fetch(endpoint);
+    if (!res.ok) return { url: null, source: 'none' };
     const json = await res.json();
-    if (json.results?.length > 0 && json.results[0].poster_path) {
-      const url = `https://image.tmdb.org/t/p/w500${json.results[0].poster_path}`;
-      return { url, source: 'tmdb' };
-    }
+    if (json.coverUrl) return { url: json.coverUrl, source: 'douban' };
   } catch {}
   return { url: null, source: 'none' };
 }

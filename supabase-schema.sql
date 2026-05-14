@@ -24,6 +24,8 @@ CREATE TABLE movies (
   rating INTEGER NOT NULL DEFAULT 4,
   review TEXT NOT NULL DEFAULT '',
   link TEXT,
+  cover_url TEXT,
+  watch_url TEXT,
   cover_colors TEXT[] NOT NULL DEFAULT ARRAY['#1a1a2a', '#4a5a6a'],
   created_at TIMESTAMPTZ DEFAULT now()
 );

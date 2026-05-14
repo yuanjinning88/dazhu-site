@@ -29,6 +29,7 @@ export interface MovieRecord {
   review: string;
   link: string | null;
   cover_url: string | null;
+  watch_url: string | null;
   cover_colors: string[];
   created_at: string;
 }

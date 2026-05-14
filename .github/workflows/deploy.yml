@@ -22,7 +22,9 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-          VITE_TMDB_API_KEY: ${{ secrets.VITE_TMDB_API_KEY }}
+
+      - name: Copy Functions
+        run: cp -r functions dist/
 
       - name: Deploy to Cloudflare Pages
         run: npx wrangler pages deploy dist/ --project-name=dazhu-site --branch main

@@ -11,6 +11,7 @@ function toItem(r: MovieRecord): MovieItem {
     id: r.id, title: r.title, titleZh: r.title_zh, director: r.director,
     year: r.year, rating: r.rating, review: r.review,
     link: r.link || undefined,
+    watchUrl: r.watch_url || undefined,
     coverUrl: r.cover_url || null,
     posterColors: (r.cover_colors?.length === 2 ? r.cover_colors : ['#1a1a2a', '#4a5a6a']) as [string, string],
   };
@@ -63,10 +64,15 @@ export default function MovieDetailPage() {
               <p className="text-text-muted text-sm mt-1">{item.title}</p>
               <p className="text-text-secondary text-sm mt-2">{item.director} · {item.year}</p>
               <p className="text-sm mt-1">{'⭐'.repeat(item.rating)}</p>
-              {item.link && (
-                <a href={item.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 mt-2 text-sm text-accent hover:underline">
-                  查看链接 <Icon name="external" size={14} />
+              {item.watchUrl && (
+                <a href={item.watchUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 mt-2 text-sm text-accent hover:underline">
+                  观看路径 <Icon name="external" size={14} />
                 </a>
+              )}
+              {item.link && (
+                <p className="text-xs text-text-muted mt-1">
+                  豆瓣参考: <a href={item.link} target="_blank" rel="noopener noreferrer" className="hover:underline">{item.link}</a>
+                </p>
               )}
             </div>
           </div>
