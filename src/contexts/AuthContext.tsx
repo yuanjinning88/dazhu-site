@@ -1,39 +1,74 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { supabase } from '@/lib/supabase';
 
 interface AuthContextValue {
   isAdmin: boolean;
-  login: (password: string) => boolean;
-  logout: () => void;
+  loading: boolean;
+  login: (password: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 const STORAGE_KEY = 'dazhu_admin_auth';
+const ADMIN_EMAIL = 'admin@dazhu-site.internal';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setIsAdmin(localStorage.getItem(STORAGE_KEY) === '1');
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const authed = !!session;
+      setIsAdmin(authed);
+      if (authed) {
+        localStorage.setItem(STORAGE_KEY, '1');
+      } else {
+        localStorage.removeItem(STORAGE_KEY);
+      }
+      setLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const authed = !!session;
+      setIsAdmin(authed);
+      if (authed) {
+        localStorage.setItem(STORAGE_KEY, '1');
+      } else {
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  function login(password: string): boolean {
-    const correct = import.meta.env.VITE_ADMIN_PASSWORD || 'dazhu2024';
-    if (password === correct) {
-      localStorage.setItem(STORAGE_KEY, '1');
-      setIsAdmin(true);
-      return true;
+  async function login(password: string): Promise<{ success: boolean; error?: string }> {
+    const { error } = await supabase.auth.signInWithPassword({
+      email: ADMIN_EMAIL,
+      password,
+    });
+
+    if (error) {
+      // Map common Supabase errors to Chinese
+      if (error.message.includes('Invalid login credentials')) {
+        return { success: false, error: '密码错误' };
+      }
+      return { success: false, error: error.message };
     }
-    return false;
+
+    localStorage.setItem(STORAGE_KEY, '1');
+    setIsAdmin(true);
+    return { success: true };
   }
 
-  function logout() {
+  async function logout() {
+    await supabase.auth.signOut();
     localStorage.removeItem(STORAGE_KEY);
     setIsAdmin(false);
   }
 
   return (
-    <AuthContext.Provider value={{ isAdmin, login, logout }}>
+    <AuthContext.Provider value={{ isAdmin, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

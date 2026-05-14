@@ -4,20 +4,28 @@ import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
-  const { isAdmin, login } = useAuth();
+  const { isAdmin, loading: authLoading, login } = useAuth();
   const navigate = useNavigate();
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
+  // Still checking session — show nothing to avoid flash
+  if (authLoading) return null;
   if (isAdmin) return <Navigate to="/" replace />;
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
-    if (login(password)) {
+    setSubmitting(true);
+
+    const result = await login(password);
+    setSubmitting(false);
+
+    if (result.success) {
       navigate('/', { replace: true });
     } else {
-      setError('密码错误');
+      setError(result.error || '密码错误');
       setPassword('');
     }
   }
@@ -53,6 +61,7 @@ export default function LoginPage() {
             className="w-full h-[44px] px-4 rounded-xl border border-black/10 text-[16px] text-[#1d1d1f] placeholder:text-[#86868B] outline-none focus:border-[#0066cc]/50 transition-colors mb-4"
             placeholder="密码"
             autoFocus
+            disabled={submitting}
           />
 
           {error && (
@@ -61,10 +70,10 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            disabled={!password}
+            disabled={!password || submitting}
             className="w-full py-2.5 rounded-xl bg-[#0066cc] text-white text-[15px] font-medium hover:bg-[#0071e3] transition-colors disabled:opacity-40 active:scale-[0.98]"
           >
-            登录
+            {submitting ? '验证中...' : '登录'}
           </button>
         </form>
       </motion.div>
