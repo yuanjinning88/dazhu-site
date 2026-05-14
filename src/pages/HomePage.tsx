@@ -136,7 +136,7 @@ export default function HomePage() {
             ref={imgRef}
             src={bgUrl}
             alt=""
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover object-[50%_30%] md:object-center"
             onLoad={() => setBgLoaded(true)}
           />
           <div className="absolute inset-0 bg-black/20 z-[1]" />
