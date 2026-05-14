@@ -11,7 +11,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 const STORAGE_KEY = 'dazhu_admin_auth';
-const ADMIN_EMAIL = 'admin@dazhu-site.internal';
+const ADMIN_EMAIL = 'admin@dazhu666.top';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
