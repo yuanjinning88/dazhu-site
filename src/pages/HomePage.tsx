@@ -283,10 +283,10 @@ export default function HomePage() {
         </SectionWrapper>
       )}
 
-      {latestPhotos.length > 0 && (
-        <SectionWrapper>
-          <div className="content-width">
-            <SectionHeader title="日常碎片" href="/photos" />
+      <SectionWrapper>
+        <div className="content-width">
+          <SectionHeader title="日常碎片" href="/photos" />
+          {latestPhotos.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {latestPhotos.map((item, i) => (
                 <motion.div key={item.id} custom={i} initial="hidden" whileInView="show" viewport={{ once: true }} variants={cardReveal}>
@@ -303,9 +303,11 @@ export default function HomePage() {
                 </motion.div>
               ))}
             </div>
-          </div>
-        </SectionWrapper>
-      )}
+          ) : (
+            <p className="text-sm text-text-muted">暂无日常碎片</p>
+          )}
+        </div>
+      </SectionWrapper>
     </main>
   );
 }
