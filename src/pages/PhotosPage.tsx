@@ -42,7 +42,7 @@ function AddPhotoForm({ onClose, onAdded }: { onClose: () => void; onAdded: () =
   return (
     <motion.div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose}>
       <motion.form className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm" initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} onClick={(e) => e.stopPropagation()} onSubmit={handleSubmit}>
-        <h3 className="text-lg font-semibold mb-4">添加照片</h3>
+        <h3 className="text-lg font-semibold mb-4">添加日常碎片</h3>
         <div className="space-y-3">
           <input className="w-full px-3 py-2 rounded-lg border border-border text-sm" placeholder="标题 *" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
           <input className="w-full px-3 py-2 rounded-lg border border-border text-sm" placeholder="日期（如 2026-05）" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
@@ -101,7 +101,7 @@ export default function PhotosPage() {
       <div className="content-width">
         <div className="flex items-end justify-between mb-10">
           <div>
-            <motion.h1 className="text-4xl font-bold text-text-primary tracking-tight mb-2" initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>照片</motion.h1>
+            <motion.h1 className="text-4xl font-bold text-text-primary tracking-tight mb-2" initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>日常碎片</motion.h1>
             <p className="text-text-muted">生活里的瞬间</p>
           </div>
           {isAdmin && (
@@ -116,7 +116,7 @@ export default function PhotosPage() {
         {loading ? (
           <p className="text-text-muted text-sm">加载中...</p>
         ) : items.length === 0 ? (
-          <p className="text-text-muted text-sm">暂无照片，点右上角「添加」</p>
+          <p className="text-text-muted text-sm">暂无日常碎片，点右上角「添加」</p>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {items.map((item, i) => (

@@ -12,6 +12,7 @@ export interface MusicItem {
   link?: string;
   coverUrl: string | null;
   coverColors: [string, string];
+  createdAt?: string;
 }
 
 function toItem(r: MusicRecord): MusicItem {
@@ -26,6 +27,7 @@ function toItem(r: MusicRecord): MusicItem {
     link: r.link || undefined,
     coverUrl: r.cover_url || null,
     coverColors: (r.cover_colors?.length === 2 ? r.cover_colors : ['#1a1a2a', '#4a5a6a']) as [string, string],
+    createdAt: r.created_at,
   };
 }
 

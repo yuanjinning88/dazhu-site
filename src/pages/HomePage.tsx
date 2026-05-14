@@ -24,6 +24,33 @@ const cardReveal = {
   show: (i: number) => ({ opacity: 1, y: 0, transition: { duration: 0.4, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] } }),
 };
 
+interface ActivityItem {
+  type: 'essay' | 'music' | 'movie' | 'note';
+  typeLabel: string;
+  title: string;
+  subtitle: string;
+  time: Date;
+  link: string;
+}
+
+function formatRelativeTime(date: Date): string {
+  const diffMs = Date.now() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if (diffDays < 1) return '今天';
+  if (diffDays < 2) return '昨天';
+  if (diffDays < 7) return `${diffDays}天前`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)}周前`;
+  if (diffDays < 365) return `${Math.floor(diffDays / 30)}个月前`;
+  return `${Math.floor(diffDays / 365)}年前`;
+}
+
+const typeColors: Record<string, string> = {
+  essay: 'text-accent',
+  music: 'text-amber-500',
+  movie: 'text-rose-400',
+  note: 'text-emerald-500',
+};
+
 const bgImages = Array.from({ length: 12 }, (_, i) => `/images/bg/bg-${String(i + 1).padStart(2, '0')}.png`);
 
 export default function HomePage() {
@@ -40,6 +67,46 @@ export default function HomePage() {
 
   const randomQuote = useMemo(() => getRandomQuote(), []);
 
+  const recentActivities = useMemo(() => {
+    const allPosts = getAllPosts();
+    const activities: ActivityItem[] = [
+      ...allPosts.map((p) => ({
+        type: 'essay' as const,
+        typeLabel: '随笔',
+        title: p.title,
+        subtitle: p.category === 'life' ? '生活' : p.category === 'work' ? '工作' : p.category === 'inspiration' ? '灵感' : p.category,
+        time: new Date(p.date),
+        link: `/essays/${p.slug}`,
+      })),
+      ...music.map((m) => ({
+        type: 'music' as const,
+        typeLabel: '音乐',
+        title: m.title,
+        subtitle: m.artist,
+        time: new Date(m.createdAt || 0),
+        link: `/music/${m.id}`,
+      })),
+      ...movies.map((m) => ({
+        type: 'movie' as const,
+        typeLabel: '电影',
+        title: m.titleZh,
+        subtitle: m.director,
+        time: new Date(m.createdAt || 0),
+        link: `/movies/${m.id}`,
+      })),
+      ...notes.map((n) => ({
+        type: 'note' as const,
+        typeLabel: '笔记',
+        title: n.title,
+        subtitle: n.status === 'inbox' ? '待整理' : n.status === 'archived' ? '已归档' : '草稿',
+        time: new Date(n.createdAt),
+        link: `/notes/${n.id}`,
+      })),
+    ];
+    activities.sort((a, b) => b.time.getTime() - a.time.getTime());
+    return activities.slice(0, 5);
+  }, [music, movies, notes]);
+
   const [bgUrl] = useState(() => bgImages[Math.floor(Math.random() * bgImages.length)]);
   const [bgLoaded, setBgLoaded] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -52,7 +119,6 @@ export default function HomePage() {
 
   const latestPosts = getAllPosts().slice(0, 3);
   const latestMusic = music.slice(0, 3);
-  const latestMovies = movies.slice(0, 3);
   const latestNotes = notes.slice(0, 3);
   const latestPhotos = photos.slice(0, 4);
 
@@ -171,17 +237,20 @@ export default function HomePage() {
         </SectionWrapper>
       )}
 
-      {latestMovies.length > 0 && (
+      {recentActivities.length > 0 && (
         <SectionWrapper>
           <div className="content-width">
-            <SectionHeader title="最近在看" href="/movies" />
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
-              {latestMovies.map((item, i) => (
-                <motion.div key={item.id} custom={i} initial="hidden" whileInView="show" viewport={{ once: true }} variants={cardReveal}>
-                  <Link to={`/movies/${item.id}`} className="block group cursor-pointer">
-                    <CoverImage src={item.coverUrl} alt={item.titleZh} colors={item.posterColors} className="aspect-[2/3] rounded-2xl mb-3 transition-transform duration-300 group-hover:scale-[1.02]" />
-                    <p className="text-sm font-medium text-text-primary group-hover:text-accent transition-colors">{item.titleZh}</p>
-                    <p className="text-xs text-text-muted">{item.director} · {item.year}</p>
+            <h2 className="text-xl font-semibold text-text-primary tracking-tight mb-6">最近动态</h2>
+            <div className="divide-y divide-[#f0f0f0]">
+              {recentActivities.map((item, i) => (
+                <motion.div key={`${item.type}-${i}`} custom={i} initial="hidden" whileInView="show" viewport={{ once: true }} variants={cardReveal}>
+                  <Link to={item.link} className="flex items-center gap-3 py-3 group">
+                    <span className={`text-xs font-medium w-10 shrink-0 ${typeColors[item.type]}`}>{item.typeLabel}</span>
+                    <span className="text-sm font-medium text-text-primary group-hover:text-accent transition-colors truncate flex-1">
+                      {item.title}
+                      {item.subtitle && <span className="text-text-muted font-normal"> · {item.subtitle}</span>}
+                    </span>
+                    <span className="text-xs text-text-muted shrink-0">{formatRelativeTime(item.time)}</span>
                   </Link>
                 </motion.div>
               ))}
@@ -217,7 +286,7 @@ export default function HomePage() {
       {latestPhotos.length > 0 && (
         <SectionWrapper>
           <div className="content-width">
-            <SectionHeader title="照片" href="/photos" />
+            <SectionHeader title="日常碎片" href="/photos" />
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {latestPhotos.map((item, i) => (
                 <motion.div key={item.id} custom={i} initial="hidden" whileInView="show" viewport={{ once: true }} variants={cardReveal}>

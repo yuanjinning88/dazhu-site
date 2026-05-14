@@ -12,6 +12,7 @@ export interface MovieItem {
   link?: string;
   coverUrl: string | null;
   posterColors: [string, string];
+  createdAt?: string;
 }
 
 function toItem(r: MovieRecord): MovieItem {
@@ -26,6 +27,7 @@ function toItem(r: MovieRecord): MovieItem {
     link: r.link || undefined,
     coverUrl: r.cover_url || null,
     posterColors: (r.cover_colors?.length === 2 ? r.cover_colors : ['#1a1a2a', '#4a5a6a']) as [string, string],
+    createdAt: r.created_at,
   };
 }
 

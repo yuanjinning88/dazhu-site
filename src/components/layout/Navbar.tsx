@@ -9,7 +9,6 @@ const navLinks = [
   { label: '音乐', href: '/music' },
   { label: '电影', href: '/movies' },
   { label: '笔记', href: '/notes' },
-  { label: '照片', href: '/photos' },
   { label: '关于', href: '/about' },
 ];
 
@@ -101,8 +100,8 @@ export default function Navbar() {
               className="hidden md:inline-flex items-center gap-1 text-[13px] text-[#86868B] hover:text-[#1d1d1f] transition-colors"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
-                <path d="M12 15v3m-3-3a3 3 0 100-6h-.172a3.5 3.5 0 01-2.455-1.025l-.707-.707M12 7h.172a3.5 3.5 0 012.455 1.025l.707.707M15 15v3" />
-                <path d="M15 12a3 3 0 01-3 3m-3-3a3 3 0 013-3" />
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
               </svg>
               登录
             </Link>
