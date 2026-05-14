@@ -63,3 +63,10 @@ CREATE POLICY "Admin delete essays" ON essays FOR DELETE USING (auth.role() = 'a
 CREATE POLICY "Admin insert photos" ON photos FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 CREATE POLICY "Admin update photos" ON photos FOR UPDATE USING (auth.role() = 'authenticated');
 CREATE POLICY "Admin delete photos" ON photos FOR DELETE USING (auth.role() = 'authenticated');
+
+-- 5. 授予权限（防止 "permission denied for table" 错误）
+GRANT ALL ON TABLE music  TO anon, authenticated, service_role;
+GRANT ALL ON TABLE movies TO anon, authenticated, service_role;
+GRANT ALL ON TABLE notes  TO anon, authenticated, service_role;
+GRANT ALL ON TABLE essays TO anon, authenticated, service_role;
+GRANT ALL ON TABLE photos TO anon, authenticated, service_role;

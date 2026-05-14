@@ -79,6 +79,9 @@ export async function createEssay(title: string): Promise<{ id: string } | { err
     if (error.message.includes('row-level security') || error.message.includes('policy')) {
       return { error: 'RLS 策略阻止了插入。请检查 essays 表的 INSERT policy。' };
     }
+    if (error.message.includes('permission denied')) {
+      return { error: '数据库权限不足。请在 Supabase SQL Editor 中执行 supabase-fix-essays.sql。' };
+    }
     return { error: error.message };
   }
   return { id: (data as EssayRecord).id };
@@ -97,6 +100,9 @@ export async function updateEssay(id: string, updates: {
 
   if (error) {
     console.error(error);
+    if (error.message.includes('permission denied')) {
+      return { error: '数据库权限不足。请在 Supabase SQL Editor 中执行 supabase-fix-essays.sql。' };
+    }
     return { error: error.message };
   }
   return { ok: true };

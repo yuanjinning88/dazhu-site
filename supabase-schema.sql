@@ -95,3 +95,10 @@ CREATE POLICY "Allow anon delete" ON movies FOR DELETE USING (true);
 CREATE POLICY "Allow anon delete" ON notes FOR DELETE USING (true);
 CREATE POLICY "Allow anon delete" ON essays FOR DELETE USING (true);
 CREATE POLICY "Allow anon delete" ON photos FOR DELETE USING (true);
+
+-- 授予权限
+GRANT ALL ON TABLE music  TO anon, authenticated, service_role;
+GRANT ALL ON TABLE movies TO anon, authenticated, service_role;
+GRANT ALL ON TABLE notes  TO anon, authenticated, service_role;
+GRANT ALL ON TABLE essays TO anon, authenticated, service_role;
+GRANT ALL ON TABLE photos TO anon, authenticated, service_role;
