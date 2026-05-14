@@ -83,9 +83,9 @@ export default function Navbar() {
           })}
         </div>
 
-        {/* Right side: logout + hamburger */}
+        {/* Right side: login / logout + hamburger */}
         <div className="flex items-center gap-3">
-          {isAdmin && (
+          {isAdmin ? (
             <button
               onClick={handleLogout}
               className="hidden md:inline-flex items-center gap-1 text-[13px] text-[#86868B] hover:text-[#1d1d1f] transition-colors"
@@ -95,6 +95,17 @@ export default function Navbar() {
               </svg>
               退出登录
             </button>
+          ) : (
+            <Link
+              to="/login"
+              className="hidden md:inline-flex items-center gap-1 text-[13px] text-[#86868B] hover:text-[#1d1d1f] transition-colors"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                <path d="M12 15v3m-3-3a3 3 0 100-6h-.172a3.5 3.5 0 01-2.455-1.025l-.707-.707M12 7h.172a3.5 3.5 0 012.455 1.025l.707.707M15 15v3" />
+                <path d="M15 12a3 3 0 01-3 3m-3-3a3 3 0 013-3" />
+              </svg>
+              登录
+            </Link>
           )}
 
           {/* Mobile hamburger */}
@@ -147,13 +158,21 @@ export default function Navbar() {
                   </Link>
                 );
               })}
-              {isAdmin && (
+              {isAdmin ? (
                 <button
                   onClick={handleLogout}
                   className="py-2 text-sm text-[#86868B] hover:text-[#1d1d1f] transition-colors text-left"
                 >
                   退出登录
                 </button>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={() => setMenuOpen(false)}
+                  className="py-2 text-sm text-[#86868B] hover:text-[#1d1d1f] transition-colors"
+                >
+                  登录
+                </Link>
               )}
             </div>
           </motion.div>
