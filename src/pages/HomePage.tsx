@@ -124,7 +124,7 @@ export default function HomePage() {
 
   return (
     <main>
-      <section className="h-screen relative overflow-hidden">
+      <section className="aspect-[16/9] md:aspect-auto md:h-screen relative overflow-hidden">
         {/* Background image with scale-in animation */}
         <div
           className={`absolute inset-0 transition-all duration-[1.8s] ${
@@ -136,7 +136,7 @@ export default function HomePage() {
             ref={imgRef}
             src={bgUrl}
             alt=""
-            className="absolute inset-0 w-full h-full object-cover object-[50%_30%] md:object-center"
+            className="absolute inset-0 w-full h-full object-cover"
             onLoad={() => setBgLoaded(true)}
           />
           <div className="absolute inset-0 bg-black/20 z-[1]" />
