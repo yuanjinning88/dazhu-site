@@ -57,3 +57,9 @@ export async function addMovie(item: Omit<MovieItem, 'id'>): Promise<void> {
     cover_colors: item.posterColors,
   });
 }
+
+export async function deleteMovie(id: string): Promise<boolean> {
+  const { error } = await supabase.from('movies').delete().eq('id', id);
+  if (error) { console.error(error); return false; }
+  return true;
+}

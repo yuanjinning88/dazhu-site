@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useMovies, addMovie } from '@/hooks/useMovies';
+import { useMovies, addMovie, deleteMovie } from '@/hooks/useMovies';
 import { generateCoverColors } from '@/lib/coverGenerator';
 import { searchMovieCover } from '@/lib/coverFetcher';
+import { useAuth } from '@/contexts/AuthContext';
 import CoverImage from '@/components/ui/CoverImage';
 import Icon from '@/components/icons';
+import DeleteConfirmModal from '@/components/DeleteConfirmModal';
 
 function AddMovieForm({ onClose, onAdded }: { onClose: () => void; onAdded: () => void }) {
   const [form, setForm] = useState({ titleZh: '', director: '', year: '', rating: '4', review: '', link: '' });
@@ -44,7 +45,7 @@ function AddMovieForm({ onClose, onAdded }: { onClose: () => void; onAdded: () =
               {[5, 4, 3, 2, 1].map((n) => <option key={n} value={n}>{'⭐'.repeat(n)}</option>)}
             </select>
           </div>
-          <input className="w-full px-3 py-2 rounded-lg border border-border text-sm" placeholder="链接（选填）" value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} />
+          <input className="w-full px-3 py-2 rounded-lg border border-border text-sm" placeholder="豆瓣链接" value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} />
           <textarea className="w-full px-3 py-2 rounded-lg border border-border text-sm resize-none" rows={3} placeholder="短评" value={form.review} onChange={(e) => setForm({ ...form, review: e.target.value })} />
         </div>
         <div className="flex gap-3 mt-4">
@@ -56,41 +57,161 @@ function AddMovieForm({ onClose, onAdded }: { onClose: () => void; onAdded: () =
   );
 }
 
+function StarRating({ rating }: { rating: number }) {
+  return (
+    <span className="inline-flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map((n) => (
+        <svg
+          key={n}
+          viewBox="0 0 24 24"
+          className={`w-3.5 h-3.5 ${n <= rating ? 'text-[#f5a623] fill-[#f5a623]' : 'text-[#d4d4d4]'}`}
+          fill="currentColor"
+        >
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+        </svg>
+      ))}
+    </span>
+  );
+}
+
 export default function MoviesPage() {
   const { items, loading, refresh } = useMovies();
+  const { isAdmin } = useAuth();
   const [showForm, setShowForm] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [toast, setToast] = useState(false);
+
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    const ok = await deleteMovie(deleteTarget);
+    setDeleting(false);
+    setDeleteTarget(null);
+    if (ok) {
+      refresh();
+      setToast(true);
+      setTimeout(() => setToast(false), 2000);
+    }
+  }
 
   return (
-    <main className="min-h-screen pt-20 pb-20">
-      <div className="content-width">
-        <div className="flex items-end justify-between mb-10">
-          <div>
-            <motion.h1 className="text-4xl font-bold text-text-primary tracking-tight mb-2" initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>电影</motion.h1>
-            <p className="text-text-muted">看过的电影，留下的感受</p>
-          </div>
-          <button onClick={() => setShowForm(true)} className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-accent text-white text-sm font-medium hover:opacity-90 transition-opacity">
-            <Icon name="check" size={16} /> 添加
-          </button>
-        </div>
+    <main className="min-h-screen pt-24 pb-24 bg-white">
+      <div className="w-full px-6 md:px-10 max-w-[1440px] mx-auto">
+        {/* Header */}
+        <motion.div
+          className="mb-10"
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          <h1 className="text-[24px] font-semibold text-[#1d1d1f] tracking-tight mb-1.5">
+            电影
+          </h1>
+          <p className="text-[15px] text-[#86868B]">
+            共记录了 {loading ? '...' : items.length} 部影视作品
+          </p>
+        </motion.div>
 
+        {/* Add button */}
+        {isAdmin && (
+          <motion.div
+            className="mb-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.08 }}
+          >
+            <button
+              onClick={() => setShowForm(true)}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#0066cc] text-white text-[14px] font-medium hover:bg-[#0071e3] transition-colors active:scale-[0.97]"
+            >
+              <Icon name="check" size={16} /> 添加
+            </button>
+          </motion.div>
+        )}
+
+        {/* Grid */}
         {loading ? (
-          <p className="text-text-muted text-sm">加载中...</p>
+          <p className="text-[15px] text-[#86868B] py-16 text-center">加载中...</p>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-            {items.map((item, i) => (
-              <motion.div key={item.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: i * 0.05 }}>
-                <Link to={`/movies/${item.id}`} className="block group">
-                  <CoverImage src={item.coverUrl} alt={item.titleZh} colors={item.posterColors} className="aspect-[2/3] rounded-2xl mb-3 transition-transform duration-300 group-hover:scale-[1.02]" />
-                  <h3 className="text-sm font-medium text-text-primary group-hover:text-accent transition-colors">{item.titleZh}</h3>
-                  <p className="text-xs text-text-muted">{item.director} · {item.year}</p>
-                  {item.review && <p className="text-xs text-text-muted mt-1 line-clamp-2">{item.review}</p>}
-                </Link>
-              </motion.div>
-            ))}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            {items.map((item, i) => {
+              const hasLink = !!item.link;
+              const CardTag = hasLink ? 'a' : 'div';
+              const cardProps = hasLink
+                ? { href: item.link, target: '_blank', rel: 'noopener noreferrer' }
+                : {};
+
+              return (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: i * 0.04 }}
+                >
+                  <div className="relative group/card">
+                    {/* @ts-ignore — dynamic tag */}
+                    <CardTag
+                      {...cardProps}
+                      className="block cursor-pointer"
+                    >
+                      <div className="aspect-[2/3] rounded-xl overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.15)] transition-shadow duration-300 mb-3">
+                        <CoverImage
+                          src={item.coverUrl}
+                          alt={item.titleZh}
+                          colors={item.posterColors}
+                          className="w-full h-full"
+                        />
+                      </div>
+                      <h3 className="text-[14px] font-medium text-[#1d1d1f] text-center leading-tight mb-1.5 truncate px-1">
+                        {item.titleZh}
+                      </h3>
+                      <div className="flex items-center justify-center gap-1.5">
+                        <StarRating rating={item.rating} />
+                        <span className="text-[13px] text-[#86868B]">{item.rating}.0</span>
+                      </div>
+                    </CardTag>
+
+                    {isAdmin && (
+                      <button
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setDeleteTarget(item.id); }}
+                        className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-lg bg-white/80 backdrop-blur-sm border border-black/5 text-[#86868B] hover:text-red-500 hover:border-red-200 hover:bg-red-50 opacity-0 group-hover/card:opacity-100 transition-all duration-200"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
+                          <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                          <line x1="10" y1="11" x2="10" y2="17" />
+                          <line x1="14" y1="11" x2="14" y2="17" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         )}
 
-        <AnimatePresence>{showForm && <AddMovieForm onClose={() => setShowForm(false)} onAdded={refresh} />}</AnimatePresence>
+        {toast && (
+          <motion.div
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 bg-[#1d1d1f] text-white text-[14px] rounded-full shadow-lg"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 12 }}
+          >
+            删除成功
+          </motion.div>
+        )}
+
+        <AnimatePresence>
+          {showForm && <AddMovieForm onClose={() => setShowForm(false)} onAdded={refresh} />}
+          {deleteTarget && (
+            <DeleteConfirmModal
+              onClose={() => setDeleteTarget(null)}
+              onConfirm={handleDelete}
+              deleting={deleting}
+            />
+          )}
+        </AnimatePresence>
       </div>
     </main>
   );

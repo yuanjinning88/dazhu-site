@@ -79,3 +79,17 @@ CREATE POLICY "Allow anon insert" ON movies FOR INSERT WITH CHECK (true);
 CREATE POLICY "Allow anon insert" ON notes FOR INSERT WITH CHECK (true);
 CREATE POLICY "Allow anon insert" ON essays FOR INSERT WITH CHECK (true);
 CREATE POLICY "Allow anon insert" ON photos FOR INSERT WITH CHECK (true);
+
+-- 允许 anon 更新（匿名用户可通过网站编辑内容）
+CREATE POLICY "Allow anon update" ON music FOR UPDATE USING (true) WITH CHECK (true);
+CREATE POLICY "Allow anon update" ON movies FOR UPDATE USING (true) WITH CHECK (true);
+CREATE POLICY "Allow anon update" ON notes FOR UPDATE USING (true) WITH CHECK (true);
+CREATE POLICY "Allow anon update" ON essays FOR UPDATE USING (true) WITH CHECK (true);
+CREATE POLICY "Allow anon update" ON photos FOR UPDATE USING (true) WITH CHECK (true);
+
+-- 允许 anon 删除（匿名用户可通过网站删除内容）
+CREATE POLICY "Allow anon delete" ON music FOR DELETE USING (true);
+CREATE POLICY "Allow anon delete" ON movies FOR DELETE USING (true);
+CREATE POLICY "Allow anon delete" ON notes FOR DELETE USING (true);
+CREATE POLICY "Allow anon delete" ON essays FOR DELETE USING (true);
+CREATE POLICY "Allow anon delete" ON photos FOR DELETE USING (true);

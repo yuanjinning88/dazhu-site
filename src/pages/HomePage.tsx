@@ -6,7 +6,7 @@ import { useMusic } from '@/hooks/useMusic';
 import { useMovies } from '@/hooks/useMovies';
 import { useNotes } from '@/hooks/useSupabaseNotes';
 import { getAllPosts } from '@/hooks/useBlogPosts';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase, type PhotoRecord } from '@/lib/supabase';
 
 function SectionHeader({ title, href }: { title: string; href: string }) {
@@ -23,6 +23,8 @@ const cardReveal = {
   show: (i: number) => ({ opacity: 1, y: 0, transition: { duration: 0.4, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] } }),
 };
 
+const bgImages = Array.from({ length: 12 }, (_, i) => `/images/bg/bg-${String(i + 1).padStart(2, '0')}.png`);
+
 export default function HomePage() {
   const { items: music } = useMusic();
   const { items: movies } = useMovies();
@@ -35,6 +37,16 @@ export default function HomePage() {
   }, []);
   useEffect(() => { fetchPhotos(); }, [fetchPhotos]);
 
+  const [bgUrl] = useState(() => bgImages[Math.floor(Math.random() * bgImages.length)]);
+  const [bgLoaded, setBgLoaded] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    if (imgRef.current?.complete) {
+      setBgLoaded(true);
+    }
+  }, []);
+
   const latestPosts = getAllPosts().slice(0, 3);
   const latestMusic = music.slice(0, 3);
   const latestMovies = movies.slice(0, 3);
@@ -43,14 +55,73 @@ export default function HomePage() {
 
   return (
     <main>
-      <section className="min-h-[70vh] flex items-center pt-14">
-        <div className="content-width">
-          <motion.h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-text-primary tracking-tight mb-6" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}>
-            大猪
-          </motion.h1>
-          <motion.p className="text-lg md:text-xl text-text-secondary font-light max-w-md" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}>
-            写代码，听音乐，看电影，偶尔拍照。
-          </motion.p>
+      <section className="h-screen relative overflow-hidden">
+        {/* Background image with scale-in animation */}
+        <div
+          className={`absolute inset-0 transition-all duration-[1.8s] ${
+            bgLoaded ? 'scale-100 opacity-100' : 'scale-[1.4] opacity-0'
+          }`}
+          style={{ transitionTimingFunction: 'cubic-bezier(0.5, 0, 0, 1)' }}
+        >
+          <img
+            ref={imgRef}
+            src={bgUrl}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover"
+            onLoad={() => setBgLoaded(true)}
+          />
+          <div className="absolute inset-0 bg-black/20 z-[1]" />
+          <div className="absolute top-0 left-0 w-full h-1/4 min-h-[60px] bg-gradient-to-b from-white to-transparent z-[2]" />
+        </div>
+
+        {/* Hero content */}
+        <div className="relative z-[4] h-full flex items-center content-width pt-14">
+          <div>
+            <motion.h1
+              className="text-5xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight mb-6 drop-shadow-lg"
+              initial={{ opacity: 0, y: 30 }}
+              animate={bgLoaded ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+              transition={{ duration: 0.8, delay: 0.3, ease: [0.5, 0, 0, 1] }}
+            >
+              大猪
+            </motion.h1>
+            <motion.p
+              className="text-lg md:text-xl text-white/80 font-light max-w-md drop-shadow-md"
+              initial={{ opacity: 0, y: 20 }}
+              animate={bgLoaded ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.8, delay: 0.45, ease: [0.5, 0, 0, 1] }}
+            >
+              写代码，听音乐，看电影，偶尔拍照。
+            </motion.p>
+          </div>
+        </div>
+
+        {/* SVG Waves */}
+        <div className="absolute bottom-0 left-0 w-full overflow-hidden pointer-events-none z-[3]">
+          <svg
+            className="w-full h-[80px] md:h-[100px]"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 24 150 28"
+            preserveAspectRatio="none"
+            shapeRendering="auto"
+          >
+            <defs>
+              <path
+                id="hero-wave"
+                d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z"
+              />
+            </defs>
+            <g>
+              <use href="#hero-wave" x="48" y="0" fill="rgba(255,255,255,0.7)"
+                style={{ animation: 'wave-move 7s cubic-bezier(0.55, 0.5, 0.45, 0.5) infinite', animationDelay: '-2s' }} />
+              <use href="#hero-wave" x="48" y="3" fill="rgba(255,255,255,0.5)"
+                style={{ animation: 'wave-move 10s cubic-bezier(0.55, 0.5, 0.45, 0.5) infinite', animationDelay: '-3s' }} />
+              <use href="#hero-wave" x="48" y="5" fill="rgba(255,255,255,0.3)"
+                style={{ animation: 'wave-move 13s cubic-bezier(0.55, 0.5, 0.45, 0.5) infinite', animationDelay: '-4s' }} />
+              <use href="#hero-wave" x="48" y="7" fill="#ffffff"
+                style={{ animation: 'wave-move 20s cubic-bezier(0.55, 0.5, 0.45, 0.5) infinite', animationDelay: '-5s' }} />
+            </g>
+          </svg>
         </div>
       </section>
 
@@ -119,9 +190,11 @@ export default function HomePage() {
               {latestNotes.map((item, i) => (
                 <motion.div key={item.id} custom={i} initial="hidden" whileInView="show" viewport={{ once: true }} variants={cardReveal}>
                   <Link to={`/notes/${item.id}`} className="block group bg-white rounded-2xl p-6 h-full shadow-card hover:shadow-card-hover transition-shadow duration-300">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xs text-text-muted border border-border rounded-md px-2 py-0.5">{item.difficulty}</span>
-                      <span className="text-xs text-text-muted">{item.readingTime} 分钟</span>
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                      <span className="text-xs text-text-muted border border-border rounded-md px-2 py-0.5">{item.status === 'inbox' ? '待整理' : item.status === 'archived' ? '已归档' : '草稿'}</span>
+                      {item.tags.slice(0, 2).map((tag) => (
+                        <span key={tag} className="text-xs text-text-muted bg-bg-secondary rounded-md px-2 py-0.5">{tag}</span>
+                      ))}
                     </div>
                     <h3 className="text-base font-medium text-text-primary mb-2 group-hover:text-accent transition-colors duration-200">{item.title}</h3>
                     <p className="text-sm text-text-muted leading-relaxed line-clamp-2">{item.description}</p>

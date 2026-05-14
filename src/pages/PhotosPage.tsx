@@ -2,7 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase, type PhotoRecord } from '@/lib/supabase';
 import { generateCoverColors } from '@/lib/coverGenerator';
+import { useAuth } from '@/contexts/AuthContext';
 import Icon from '@/components/icons';
+import DeleteConfirmModal from '@/components/DeleteConfirmModal';
 
 interface PhotoItem {
   id: string;
@@ -58,9 +60,13 @@ function AddPhotoForm({ onClose, onAdded }: { onClose: () => void; onAdded: () =
 
 export default function PhotosPage() {
   const [items, setItems] = useState<PhotoItem[]>([]);
+  const { isAdmin } = useAuth();
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [fetchError, setFetchError] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [toast, setToast] = useState(false);
 
   const fetch = useCallback(async () => {
     setFetchError('');
@@ -77,6 +83,19 @@ export default function PhotosPage() {
 
   useEffect(() => { fetch(); }, [fetch]);
 
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    const { error } = await supabase.from('photos').delete().eq('id', deleteTarget);
+    setDeleting(false);
+    setDeleteTarget(null);
+    if (!error) {
+      fetch();
+      setToast(true);
+      setTimeout(() => setToast(false), 2000);
+    }
+  }
+
   return (
     <main className="min-h-screen pt-20 pb-20">
       <div className="content-width">
@@ -85,9 +104,11 @@ export default function PhotosPage() {
             <motion.h1 className="text-4xl font-bold text-text-primary tracking-tight mb-2" initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>照片</motion.h1>
             <p className="text-text-muted">生活里的瞬间</p>
           </div>
-          <button onClick={() => setShowForm(true)} className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-accent text-white text-sm font-medium hover:opacity-90 transition-opacity">
-            <Icon name="check" size={16} /> 添加
-          </button>
+          {isAdmin && (
+            <button onClick={() => setShowForm(true)} className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-accent text-white text-sm font-medium hover:opacity-90 transition-opacity">
+              <Icon name="check" size={16} /> 添加
+            </button>
+          )}
         </div>
 
         {fetchError && <p className="text-red-500 text-sm mb-4">读取错误：{fetchError}</p>}
@@ -100,23 +121,57 @@ export default function PhotosPage() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {items.map((item, i) => (
               <motion.div key={item.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: i * 0.04 }}>
-                <div className="group cursor-pointer">
-                  {item.imageUrl ? (
-                    <div className="aspect-square rounded-2xl mb-2 overflow-hidden transition-transform duration-300 group-hover:scale-[1.02]">
-                      <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
-                    </div>
-                  ) : (
-                    <div className="aspect-square rounded-2xl mb-2 transition-transform duration-300 group-hover:scale-[1.02]" style={{ background: `linear-gradient(135deg, ${item.colors[0]}, ${item.colors[1]})` }} />
+                <div className="relative group/card">
+                  <div className="group cursor-pointer">
+                    {item.imageUrl ? (
+                      <div className="aspect-square rounded-2xl mb-2 overflow-hidden transition-transform duration-300 group-hover:scale-[1.02]">
+                        <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="aspect-square rounded-2xl mb-2 transition-transform duration-300 group-hover:scale-[1.02]" style={{ background: `linear-gradient(135deg, ${item.colors[0]}, ${item.colors[1]})` }} />
+                    )}
+                    <p className="text-xs text-text-muted">{item.title}</p>
+                    {item.date && <p className="text-xs text-text-muted/60">{item.date}</p>}
+                  </div>
+                  {isAdmin && (
+                    <button
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setDeleteTarget(item.id); }}
+                      className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-lg bg-white/80 backdrop-blur-sm border border-black/5 text-[#86868B] hover:text-red-500 hover:border-red-200 hover:bg-red-50 opacity-0 group-hover/card:opacity-100 transition-all duration-200"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
+                        <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                        <line x1="10" y1="11" x2="10" y2="17" />
+                        <line x1="14" y1="11" x2="14" y2="17" />
+                      </svg>
+                    </button>
                   )}
-                  <p className="text-xs text-text-muted">{item.title}</p>
-                  {item.date && <p className="text-xs text-text-muted/60">{item.date}</p>}
                 </div>
               </motion.div>
             ))}
           </div>
         )}
 
-        <AnimatePresence>{showForm && <AddPhotoForm onClose={() => setShowForm(false)} onAdded={fetch} />}</AnimatePresence>
+        {toast && (
+          <motion.div
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 bg-[#1d1d1f] text-white text-[14px] rounded-full shadow-lg"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 12 }}
+          >
+            删除成功
+          </motion.div>
+        )}
+
+        <AnimatePresence>
+          {showForm && <AddPhotoForm onClose={() => setShowForm(false)} onAdded={fetch} />}
+          {deleteTarget && (
+            <DeleteConfirmModal
+              onClose={() => setDeleteTarget(null)}
+              onConfirm={handleDelete}
+              deleting={deleting}
+            />
+          )}
+        </AnimatePresence>
       </div>
     </main>
   );

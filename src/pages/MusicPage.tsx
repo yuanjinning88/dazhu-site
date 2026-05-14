@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useMusic, addMusic, type MusicItem } from '@/hooks/useMusic';
+import { useMusic, addMusic, deleteMusic, type MusicItem } from '@/hooks/useMusic';
 import { generateCoverColors } from '@/lib/coverGenerator';
 import { searchMusicCover } from '@/lib/coverFetcher';
+import { useAuth } from '@/contexts/AuthContext';
 import CoverImage from '@/components/ui/CoverImage';
 import Icon from '@/components/icons';
+import DeleteConfirmModal from '@/components/DeleteConfirmModal';
 
 function AddMusicForm({ onClose, onAdded }: { onClose: () => void; onAdded: () => void }) {
   const [form, setForm] = useState({ title: '', artist: '', year: '', genre: '', rating: '4', review: '', link: '' });
@@ -68,7 +70,24 @@ function AddMusicForm({ onClose, onAdded }: { onClose: () => void; onAdded: () =
 
 export default function MusicPage() {
   const { items, loading, refresh } = useMusic();
+  const { isAdmin } = useAuth();
   const [showForm, setShowForm] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [toast, setToast] = useState(false);
+
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    const ok = await deleteMusic(deleteTarget);
+    setDeleting(false);
+    setDeleteTarget(null);
+    if (ok) {
+      refresh();
+      setToast(true);
+      setTimeout(() => setToast(false), 2000);
+    }
+  }
 
   return (
     <main className="min-h-screen pt-20 pb-20">
@@ -78,9 +97,11 @@ export default function MusicPage() {
             <motion.h1 className="text-4xl font-bold text-text-primary tracking-tight mb-2" initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>音乐</motion.h1>
             <p className="text-text-muted">最近在听的专辑与单曲</p>
           </div>
-          <button onClick={() => setShowForm(true)} className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-accent text-white text-sm font-medium hover:opacity-90 transition-opacity">
-            <Icon name="check" size={16} /> 添加
-          </button>
+          {isAdmin && (
+            <button onClick={() => setShowForm(true)} className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-accent text-white text-sm font-medium hover:opacity-90 transition-opacity">
+              <Icon name="check" size={16} /> 添加
+            </button>
+          )}
         </div>
 
         {loading ? (
@@ -89,18 +110,52 @@ export default function MusicPage() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
             {items.map((item, i) => (
               <motion.div key={item.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: i * 0.05 }}>
-                <Link to={`/music/${item.id}`} className="block group">
-                  <CoverImage src={item.coverUrl} alt={item.title} colors={item.coverColors} className="aspect-square rounded-2xl mb-3 transition-transform duration-300 group-hover:scale-[1.02]" />
-                  <h3 className="text-sm font-medium text-text-primary group-hover:text-accent transition-colors">{item.title}</h3>
-                  <p className="text-xs text-text-muted">{item.artist} · {item.year}</p>
-                  {item.review && <p className="text-xs text-text-muted mt-1 line-clamp-2">{item.review}</p>}
-                </Link>
+                <div className="relative group/card">
+                  <Link to={`/music/${item.id}`} className="block">
+                    <CoverImage src={item.coverUrl} alt={item.title} colors={item.coverColors} className="aspect-square rounded-2xl mb-3 transition-transform duration-300 group-hover/card:scale-[1.02]" />
+                    <h3 className="text-sm font-medium text-text-primary group-hover/card:text-accent transition-colors">{item.title}</h3>
+                    <p className="text-xs text-text-muted">{item.artist} · {item.year}</p>
+                    {item.review && <p className="text-xs text-text-muted mt-1 line-clamp-2">{item.review}</p>}
+                  </Link>
+                  {isAdmin && (
+                    <button
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setDeleteTarget(item.id); }}
+                      className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-lg bg-white/80 backdrop-blur-sm border border-black/5 text-[#86868B] hover:text-red-500 hover:border-red-200 hover:bg-red-50 opacity-0 group-hover/card:opacity-100 transition-all duration-200"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
+                        <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                        <line x1="10" y1="11" x2="10" y2="17" />
+                        <line x1="14" y1="11" x2="14" y2="17" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
               </motion.div>
             ))}
           </div>
         )}
 
-        <AnimatePresence>{showForm && <AddMusicForm onClose={() => setShowForm(false)} onAdded={refresh} />}</AnimatePresence>
+        {toast && (
+          <motion.div
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 bg-[#1d1d1f] text-white text-[14px] rounded-full shadow-lg"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 12 }}
+          >
+            删除成功
+          </motion.div>
+        )}
+
+        <AnimatePresence>
+          {showForm && <AddMusicForm onClose={() => setShowForm(false)} onAdded={refresh} />}
+          {deleteTarget && (
+            <DeleteConfirmModal
+              onClose={() => setDeleteTarget(null)}
+              onConfirm={handleDelete}
+              deleting={deleting}
+            />
+          )}
+        </AnimatePresence>
       </div>
     </main>
   );

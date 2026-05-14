@@ -1,9 +1,10 @@
 import { lazy, Suspense } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import ScrollProgress from '@/components/layout/ScrollProgress';
-import SideMenu from '@/components/layout/SideMenu';
+import useLenis from '@/hooks/useLenis';
 import HomePage from '@/pages/HomePage';
 import AboutPage from '@/pages/AboutPage';
 import EssayListPage from '@/pages/EssayListPage';
@@ -14,21 +15,46 @@ import MovieDetailPage from '@/pages/MovieDetailPage';
 import NotesListPage from '@/pages/NotesListPage';
 import NotesPostPage from '@/pages/NotesPostPage';
 import PhotosPage from '@/pages/PhotosPage';
+import LoginPage from '@/pages/LoginPage';
 
 const EssayPostPage = lazy(() => import('@/pages/EssayPostPage'));
+const EssayEditPage = lazy(() => import('@/pages/EssayEditPage'));
+const NotesEditPage = lazy(() => import('@/pages/NotesEditPage'));
+
+const PageLoader = () => (
+  <div className="min-h-screen pt-24 flex items-center justify-center">
+    <p className="text-text-muted">加载中...</p>
+  </div>
+);
+
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isAdmin } = useAuth();
+  if (!isAdmin) return <Navigate to="/login" replace />;
+  return <>{children}</>;
+}
 
 export default function App() {
+  useLenis();
+
   return (
     <>
       <ScrollProgress />
       <Navbar />
-      <SideMenu />
+
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/essays" element={<EssayListPage />} />
+        <Route path="/essays/:slug/edit" element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <EssayEditPage />
+            </Suspense>
+          </ProtectedRoute>
+        } />
         <Route path="/essays/:slug" element={
-          <Suspense fallback={<div className="min-h-screen pt-20 flex items-center justify-center text-text-muted">加载中...</div>}>
+          <Suspense fallback={<PageLoader />}>
             <EssayPostPage />
           </Suspense>
         } />
@@ -37,6 +63,13 @@ export default function App() {
         <Route path="/movies" element={<MoviesPage />} />
         <Route path="/movies/:id" element={<MovieDetailPage />} />
         <Route path="/notes" element={<NotesListPage />} />
+        <Route path="/notes/:id/edit" element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <NotesEditPage />
+            </Suspense>
+          </ProtectedRoute>
+        } />
         <Route path="/notes/:id" element={<NotesPostPage />} />
         <Route path="/photos" element={<PhotosPage />} />
       </Routes>

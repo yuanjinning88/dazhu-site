@@ -57,3 +57,9 @@ export async function addMusic(item: Omit<MusicItem, 'id'>): Promise<void> {
     cover_colors: item.coverColors,
   });
 }
+
+export async function deleteMusic(id: string): Promise<boolean> {
+  const { error } = await supabase.from('music').delete().eq('id', id);
+  if (error) { console.error(error); return false; }
+  return true;
+}

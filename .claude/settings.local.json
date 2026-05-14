@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx vercel *)",
+      "Bash(npm run *)",
+      "Bash(node -e ' *)",
+      "Bash(curl -s -L \"https://jyblog.cn/wp-content/themes/oyiso/assets/js/ahead.js?ver=1.5.2\" --max-time 10)",
+      "WebSearch",
+      "Bash(curl -s -L \"https://wallpaperaccess.com/russell-westbrook-4k\" --max-time 10)",
+      "Bash(curl -s -L \"https://wallpaperaccess.com/rip-kobe-bryant\" --max-time 10)",
+      "Bash(curl -s -L \"https://peakpx.com/en/search?q=kobe+bryant+4k\" --max-time 10)",
+      "Bash(curl -s -L \"https://w.wallhaven.cc/search?q=kobe+bryant\" --max-time 10)",
+      "Bash(curl -s -L \"https://unsplash.com/s/photos/movie\" --max-time 10)",
+      "Bash(curl -s -L \"https://unsplash.com/s/photos/film-noir\" --max-time 10)",
+      "Bash(curl -s -L \"https://unsplash.com/s/photos/dark-cinematic\" --max-time 10)",
+      "Bash(npm install *)",
+      "Bash(npm uninstall *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"https://dazhu-site.pages.dev/\")",
+      "Bash(curl -v \"https://dazhu-site.pages.dev/\")"
+    ]
+  }
+}

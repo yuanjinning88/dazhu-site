@@ -22,6 +22,25 @@
       'PingFang SC',
       system-ui,
       sans-serif;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.15);
   }
 
   ::selection {
@@ -37,5 +56,14 @@
 
   .content-width {
     @apply mx-auto max-w-content px-5 md:px-8;
+  }
+}
+
+@keyframes wave-move {
+  0% {
+    transform: translate3d(-90px, 0, 0);
+  }
+  100% {
+    transform: translate3d(85px, 0, 0);
   }
 }

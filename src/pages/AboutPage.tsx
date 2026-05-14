@@ -1,44 +1,107 @@
 import { motion } from 'framer-motion';
 
+const container = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1, delayChildren: 0.1 },
+  },
+};
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+  },
+};
+
 export default function AboutPage() {
   return (
-    <main className="min-h-screen pt-20 pb-20">
-      <div className="content-width">
-        <motion.div
-          className="max-w-lg"
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <h1 className="text-4xl font-bold text-text-primary tracking-tight mb-8">
-            关于
+    <main className="min-h-screen bg-white pt-24 pb-24">
+      <motion.div
+        className="max-w-2xl mx-auto px-6 md:px-10"
+        variants={container}
+        initial="hidden"
+        animate="visible"
+      >
+        {/* ===== 1. 自我介绍 ===== */}
+        <motion.section className="mb-20" variants={item}>
+          <h1 className="text-[32px] font-semibold text-[#1d1d1f] tracking-[-0.5px] mb-6">
+            Hi, I'm Dazhu
           </h1>
+          <p className="text-[15px] text-[#86868B] leading-relaxed">
+            这里写一段关于你自己的简短介绍。
+          </p>
+        </motion.section>
 
-          <div className="space-y-5 text-text-secondary leading-relaxed text-sm">
-            <p>
-              你好，我是大猪。
-            </p>
-            <p>
-              写代码的，平时喜欢听歌、看电影、偶尔拍照。
-              这个网站是我在互联网上的一个小角落，用来记录看过的好电影、
-              喜欢听的专辑、工作中学到的技术笔记，还有一些零零散散的随笔。
-            </p>
-            <p>
-              不追求流量，不搞 SEO，不写标题党。
-              只是想有一个地方，安安静静地放自己的东西。
-            </p>
-            <p>
-              如果偶然路过，欢迎随便看看。
-            </p>
-          </div>
-
-          <div className="mt-12 pt-8 border-t border-border">
-            <p className="text-xs text-text-muted">
+        {/* ===== 2. 邮箱联系方式 ===== */}
+        <motion.section className="mb-20" variants={item}>
+          <h2 className="text-lg font-semibold text-[#1d1d1f] mb-3">
+            联系方式
+          </h2>
+          <p className="text-[15px] text-[#86868B] leading-relaxed">
+            <a
+              href="mailto:hello@dazhu.dev"
+              className="text-[#0071E3] hover:underline transition"
+            >
               hello@dazhu.dev
+            </a>
+          </p>
+        </motion.section>
+
+        {/* ===== 3. 关于本站 ===== */}
+        <motion.section className="mb-20" variants={item}>
+          <h2 className="text-lg font-semibold text-[#1d1d1f] mb-3">
+            关于本站
+          </h2>
+          <div className="text-[15px] text-[#86868B] leading-relaxed space-y-2">
+            <p>
+              网站定位：这里写网站的定位说明。
+            </p>
+            <p>
+              内容来源：这里写内容的来源说明。
+            </p>
+            <p>
+              版权声明：这里写版权相关信息。
             </p>
           </div>
-        </motion.div>
-      </div>
+        </motion.section>
+
+        {/* ===== 4. 关于我 ===== */}
+        <motion.section className="mb-20" variants={item}>
+          <h2 className="text-lg font-semibold text-[#1d1d1f] mb-3">
+            关于我
+          </h2>
+          <ul className="text-[15px] text-[#86868B] leading-relaxed space-y-1 list-none">
+            <li>职业：这里写你的职业</li>
+            <li>爱好：这里写你的爱好</li>
+            <li>兴趣：这里写你的兴趣方向</li>
+          </ul>
+        </motion.section>
+
+        {/* ===== 5. 大事记 ===== */}
+        <motion.section variants={item}>
+          <h2 className="text-lg font-semibold text-[#1d1d1f] mb-3">
+            大事记
+          </h2>
+          <ul className="text-[15px] text-[#86868B] leading-relaxed space-y-3">
+            <li className="flex gap-4">
+              <span className="shrink-0 text-[#6E6E73]">2024-01</span>
+              <span>这里写事件描述。</span>
+            </li>
+            <li className="flex gap-4">
+              <span className="shrink-0 text-[#6E6E73]">2024-06</span>
+              <span>这里写事件描述。</span>
+            </li>
+            <li className="flex gap-4">
+              <span className="shrink-0 text-[#6E6E73]">2025-01</span>
+              <span>这里写事件描述。</span>
+            </li>
+          </ul>
+        </motion.section>
+      </motion.div>
     </main>
   );
 }
