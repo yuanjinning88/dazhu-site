@@ -16,7 +16,8 @@
       "Bash(npm install *)",
       "Bash(npm uninstall *)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"https://dazhu-site.pages.dev/\")",
-      "Bash(curl -v \"https://dazhu-site.pages.dev/\")"
+      "Bash(curl -v \"https://dazhu-site.pages.dev/\")",
+      "Bash(git push *)"
     ]
   }
 }

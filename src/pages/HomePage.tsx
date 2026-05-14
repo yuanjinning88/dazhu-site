@@ -6,7 +6,8 @@ import { useMusic } from '@/hooks/useMusic';
 import { useMovies } from '@/hooks/useMovies';
 import { useNotes } from '@/hooks/useSupabaseNotes';
 import { getAllPosts } from '@/hooks/useBlogPosts';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { getRandomQuote } from '@/data/quotes';
 import { supabase, type PhotoRecord } from '@/lib/supabase';
 
 function SectionHeader({ title, href }: { title: string; href: string }) {
@@ -36,6 +37,8 @@ export default function HomePage() {
     if (data) setPhotos((data as PhotoRecord[]).map((r) => ({ id: r.id, title: r.title, imageUrl: r.image_url, colors: (r.cover_colors?.length === 2 ? r.cover_colors : ['#6a5a4a', '#1a1a2a']) as [string, string] })));
   }, []);
   useEffect(() => { fetchPhotos(); }, [fetchPhotos]);
+
+  const randomQuote = useMemo(() => getRandomQuote(), []);
 
   const [bgUrl] = useState(() => bgImages[Math.floor(Math.random() * bgImages.length)]);
   const [bgLoaded, setBgLoaded] = useState(false);
@@ -85,14 +88,19 @@ export default function HomePage() {
             >
               大猪
             </motion.h1>
-            <motion.p
-              className="text-lg md:text-xl text-white/80 font-light max-w-md drop-shadow-md"
+            <motion.div
+              className="max-w-md drop-shadow-md"
               initial={{ opacity: 0, y: 20 }}
               animate={bgLoaded ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               transition={{ duration: 0.8, delay: 0.45, ease: [0.5, 0, 0, 1] }}
             >
-              写代码，听音乐，看电影，偶尔拍照。
-            </motion.p>
+              <p className="text-lg md:text-xl text-white/80 font-light">
+                {randomQuote.text}
+              </p>
+              <p className="text-sm text-white/50 font-light mt-2">
+                —— {randomQuote.source}
+              </p>
+            </motion.div>
           </div>
         </div>
 
