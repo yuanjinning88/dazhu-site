@@ -64,3 +64,13 @@ export interface PhotoRecord {
   cover_colors: string[];
   created_at: string;
 }
+
+export interface AboutSectionRecord {
+  id: string;
+  section_key: string;
+  title: string;
+  content: string;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}

@@ -58,6 +58,12 @@ export default {
           'system-ui',
           'sans-serif',
         ],
+        serif: [
+          'Noto Serif SC',
+          'Source Han Serif SC',
+          'Georgia',
+          'serif',
+        ],
       },
       maxWidth: {
         content: '1024px',

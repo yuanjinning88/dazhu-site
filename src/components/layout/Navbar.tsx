@@ -40,20 +40,14 @@ export default function Navbar() {
           onClick={() => setMenuOpen(false)}
         >
           <svg viewBox="0 0 32 32" fill="none" className="w-6 h-6 shrink-0">
-            {/* Pig face */}
             <ellipse cx="16" cy="17" rx="11" ry="10" fill="#FFB8B8" />
-            {/* Ears */}
             <ellipse cx="8" cy="9" rx="4" ry="5" fill="#FFA0A0" />
             <ellipse cx="24" cy="9" rx="4" ry="5" fill="#FFA0A0" />
-            {/* Eyes */}
             <circle cx="12" cy="16" r="1.5" fill="#4A4A4A" />
             <circle cx="20" cy="16" r="1.5" fill="#4A4A4A" />
-            {/* Snout */}
             <ellipse cx="16" cy="20" rx="4.5" ry="3.5" fill="#FFA0A0" />
-            {/* Nostrils */}
             <ellipse cx="14" cy="20" rx="0.8" ry="1" fill="#D48888" />
             <ellipse cx="18" cy="20" rx="0.8" ry="1" fill="#D48888" />
-            {/* Blush */}
             <ellipse cx="9" cy="18" rx="1.8" ry="1.2" fill="#FFCCD0" opacity="0.6" />
             <ellipse cx="23" cy="18" rx="1.8" ry="1.2" fill="#FFCCD0" opacity="0.6" />
           </svg>
@@ -82,7 +76,7 @@ export default function Navbar() {
           })}
         </div>
 
-        {/* Right side: login / logout + hamburger */}
+        {/* Right side */}
         <div className="flex items-center gap-3">
           {isAdmin ? (
             <button
@@ -113,19 +107,19 @@ export default function Navbar() {
             className="flex md:hidden flex-col gap-1.5 p-1"
             aria-label="菜单"
           >
-          <motion.span
-            animate={menuOpen ? { rotate: 45, y: 6 } : { rotate: 0, y: 0 }}
-            className="block w-5 h-[1.5px] bg-text-primary"
-          />
-          <motion.span
-            animate={menuOpen ? { opacity: 0 } : { opacity: 1 }}
-            className="block w-5 h-[1.5px] bg-text-primary"
-          />
-          <motion.span
-            animate={menuOpen ? { rotate: -45, y: -6 } : { rotate: 0, y: 0 }}
-            className="block w-5 h-[1.5px] bg-text-primary"
-          />
-        </button>
+            <motion.span
+              animate={menuOpen ? { rotate: 45, y: 6 } : { rotate: 0, y: 0 }}
+              className="block w-5 h-[1.5px] bg-text-primary"
+            />
+            <motion.span
+              animate={menuOpen ? { opacity: 0 } : { opacity: 1 }}
+              className="block w-5 h-[1.5px] bg-text-primary"
+            />
+            <motion.span
+              animate={menuOpen ? { rotate: -45, y: -6 } : { rotate: 0, y: 0 }}
+              className="block w-5 h-[1.5px] bg-text-primary"
+            />
+          </button>
         </div>
       </div>
 
