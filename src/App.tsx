@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import ScrollProgress from '@/components/layout/ScrollProgress';
+import CustomCursor from '@/components/cursor/CustomCursor';
 import useLenis from '@/hooks/useLenis';
 import HomePage from '@/pages/HomePage';
 import AboutPage from '@/pages/AboutPage';
@@ -39,6 +40,7 @@ export default function App() {
 
   return (
     <>
+      <CustomCursor />
       <ScrollProgress />
       <Navbar />
 
