@@ -5,8 +5,9 @@ import CoverImage from '@/components/ui/CoverImage';
 import { useMusic } from '@/hooks/useMusic';
 import { useMovies } from '@/hooks/useMovies';
 import { useNotes } from '@/hooks/useSupabaseNotes';
-import { getAllPosts } from '@/hooks/useBlogPosts';
+import { useSupabaseEssays } from '@/hooks/useSupabaseEssays';
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { getRandomQuote } from '@/data/quotes';
 import { supabase, type PhotoRecord } from '@/lib/supabase';
 
@@ -57,6 +58,7 @@ export default function HomePage() {
   const { items: music } = useMusic();
   const { items: movies } = useMovies();
   const { items: notes } = useNotes();
+  const { items: essayItems } = useSupabaseEssays();
   const [photos, setPhotos] = useState<{ id: string; title: string; imageUrl: string | null; colors: [string, string] }[]>([]);
 
   const fetchPhotos = useCallback(async () => {
@@ -68,15 +70,14 @@ export default function HomePage() {
   const randomQuote = useMemo(() => getRandomQuote(), []);
 
   const recentActivities = useMemo(() => {
-    const allPosts = getAllPosts();
     const activities: ActivityItem[] = [
-      ...allPosts.map((p) => ({
+      ...essayItems.map((e) => ({
         type: 'essay' as const,
         typeLabel: '随笔',
-        title: p.title,
-        subtitle: p.category === 'life' ? '生活' : p.category === 'work' ? '工作' : p.category === 'inspiration' ? '灵感' : p.category,
-        time: new Date(p.date),
-        link: `/essays/${p.slug}`,
+        title: e.title,
+        subtitle: e.category === 'life' ? '生活' : e.category === 'work' ? '工作' : e.category === 'inspiration' ? '灵感' : e.category,
+        time: new Date(e.date),
+        link: `/essays/${e.id}`,
       })),
       ...music.map((m) => ({
         type: 'music' as const,
@@ -105,7 +106,7 @@ export default function HomePage() {
     ];
     activities.sort((a, b) => b.time.getTime() - a.time.getTime());
     return activities.slice(0, 5);
-  }, [music, movies, notes]);
+  }, [music, movies, notes, essayItems]);
 
   const [bgUrl] = useState(() => bgImages[Math.floor(Math.random() * bgImages.length)]);
   const [bgLoaded, setBgLoaded] = useState(false);
@@ -117,12 +118,16 @@ export default function HomePage() {
     }
   }, []);
 
-  const latestPosts = getAllPosts().slice(0, 3);
+  const latestPosts = essayItems.slice(0, 3);
   const latestMusic = music.slice(0, 3);
   const latestNotes = notes.slice(0, 3);
   const latestPhotos = photos.slice(0, 4);
 
   return (
+    <><Helmet>
+      <title>大猪 — 个人角落</title>
+      <meta name="description" content="记录音乐、电影、笔记与生活。" />
+    </Helmet>
     <main>
       <section className="aspect-[16/9] md:aspect-auto md:h-screen relative overflow-hidden">
         {/* Background image with scale-in animation */}
@@ -205,8 +210,8 @@ export default function HomePage() {
             <SectionHeader title="随笔" href="/essays" />
             <div className="grid md:grid-cols-3 gap-5">
               {latestPosts.map((post, i) => (
-                <motion.div key={post.slug} custom={i} initial="hidden" whileInView="show" viewport={{ once: true }} variants={cardReveal}>
-                  <Link to={`/essays/${post.slug}`} className="block group bg-bg-secondary rounded-2xl p-6 h-full hover:shadow-card-hover transition-shadow duration-300">
+                <motion.div key={post.id} custom={i} initial="hidden" whileInView="show" viewport={{ once: true }} variants={cardReveal}>
+                  <Link to={`/essays/${post.id}`} className="block group bg-bg-secondary rounded-2xl p-6 h-full hover:shadow-card-hover transition-shadow duration-300">
                     <p className="text-xs text-text-muted mb-3">{post.date}</p>
                     <h3 className="text-base font-medium text-text-primary mb-2 group-hover:text-accent transition-colors duration-200">{post.title}</h3>
                     <p className="text-sm text-text-muted leading-relaxed line-clamp-2">{post.description}</p>
@@ -309,5 +314,6 @@ export default function HomePage() {
         </div>
       </SectionWrapper>
     </main>
+  </>
   );
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMusic, addMusic, deleteMusic, type MusicItem } from '@/hooks/useMusic';
@@ -90,6 +91,10 @@ export default function MusicPage() {
   }
 
   return (
+    <><Helmet>
+      <title>音乐 — 大猪</title>
+      <meta name="description" content="最近在听的音乐" />
+    </Helmet>
     <main className="min-h-screen pt-20 pb-20">
       <div className="content-width">
         <div className="flex items-end justify-between mb-10">
@@ -158,5 +163,6 @@ export default function MusicPage() {
         </AnimatePresence>
       </div>
     </main>
+  </>
   );
 }

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
+import SearchBar from '@/components/search/SearchBar';
 
 const navLinks = [
   { label: '首页', href: '/' },
@@ -78,6 +79,7 @@ export default function Navbar() {
 
         {/* Right side */}
         <div className="flex items-center gap-3">
+          <SearchBar />
           {isAdmin ? (
             <button
               onClick={handleLogout}

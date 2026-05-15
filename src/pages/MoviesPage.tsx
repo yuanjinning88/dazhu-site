@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMovies, addMovie, updateMovie, deleteMovie } from '@/hooks/useMovies';
 import { generateCoverColors } from '@/lib/coverGenerator';
@@ -163,6 +164,10 @@ export default function MoviesPage() {
   }
 
   return (
+    <><Helmet>
+      <title>电影 — 大猪</title>
+      <meta name="description" content="看过的电影" />
+    </Helmet>
     <main className="min-h-screen pt-24 pb-24 bg-white">
       <div className="w-full px-6 md:px-10 max-w-[1440px] mx-auto">
         {/* Header */}
@@ -294,5 +299,6 @@ export default function MoviesPage() {
         </AnimatePresence>
       </div>
     </main>
+  </>
   );
 }

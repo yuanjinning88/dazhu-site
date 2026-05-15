@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNotes, createNote, deleteNote, STATUS_LABEL, STATUS_STYLE, type NoteStatus } from '@/hooks/useSupabaseNotes';
@@ -117,6 +118,10 @@ export default function NotesListPage() {
   }
 
   return (
+    <><Helmet>
+      <title>笔记 — 大猪</title>
+      <meta name="description" content="学习笔记与资料整理" />
+    </Helmet>
     <main className="min-h-screen pt-24 pb-24 bg-[#f5f5f7]">
       <div className="content-width max-w-3xl mx-auto">
         {/* Header */}
@@ -322,5 +327,6 @@ export default function NotesListPage() {
         </AnimatePresence>
       </div>
     </main>
+  </>
   );
 }

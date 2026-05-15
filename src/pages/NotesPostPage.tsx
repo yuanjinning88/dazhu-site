@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { supabase, type NoteRecord } from '@/lib/supabase';
 import { type NoteItem, type NoteStatus, STATUS_LABEL, STATUS_STYLE } from '@/hooks/useSupabaseNotes';
 import { useAuth } from '@/contexts/AuthContext';
+import RichTextRenderer from '@/components/editor/RichTextRenderer';
 
 function toItem(r: NoteRecord): NoteItem {
   return {
@@ -16,6 +14,7 @@ function toItem(r: NoteRecord): NoteItem {
     status: (r.category as NoteStatus) || 'draft',
     description: r.description,
     content: r.content,
+    contentFormat: r.content_format || 'markdown',
     tags: r.tags || [],
     source: r.difficulty || '',
     createdAt: r.created_at,
@@ -52,7 +51,12 @@ export default function NotesPostPage() {
   );
 
   return (
-    <main className="min-h-screen pt-24 pb-24 bg-[#f5f5f7]">
+    <>
+      <Helmet>
+        <title>{note.title ? `${note.title} — 大猪` : '大猪'}</title>
+        <meta name="description" content={note.description || '学习笔记'} />
+      </Helmet>
+      <main className="min-h-screen pt-24 pb-24 bg-[#f5f5f7]">
       <div className="content-width max-w-3xl mx-auto">
         <motion.article
           initial={{ opacity: 0, y: 24 }}
@@ -121,35 +125,10 @@ export default function NotesPostPage() {
               prose-hr:border-black/5
               prose-img:rounded-xl
             ">
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                components={{
-                  code({ className, children, ...rest }) {
-                    const match = /language-(\w+)/.exec(className || '');
-                    const codeStr = String(children).replace(/\n$/, '');
-                    if (match) {
-                      return (
-                        <SyntaxHighlighter
-                          style={oneDark}
-                          language={match[1]}
-                          PreTag="div"
-                          customStyle={{
-                            margin: 0,
-                            borderRadius: '0.75rem',
-                            background: '#1a1a1a',
-                            fontSize: '0.875rem',
-                          }}
-                        >
-                          {codeStr}
-                        </SyntaxHighlighter>
-                      );
-                    }
-                    return <code className="px-1.5 py-0.5 rounded-md bg-[#f5f5f7] text-[#6E6E73] text-[14px] font-medium" {...rest}>{children}</code>;
-                  },
-                }}
-              >
-                {note.content || '*暂无内容*'}
-              </ReactMarkdown>
+              <RichTextRenderer
+                content={note.content || ''}
+                contentFormat={note.contentFormat || 'markdown'}
+              />
             </div>
           </div>
 
@@ -183,5 +162,6 @@ export default function NotesPostPage() {
         </div>
       </div>
     </main>
+  </>
   );
 }

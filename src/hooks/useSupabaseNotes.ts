@@ -17,6 +17,7 @@ export interface NoteItem {
   status: NoteStatus;
   description: string;
   content: string;
+  contentFormat: string;
   tags: string[];
   source: string;
   createdAt: string;
@@ -29,6 +30,7 @@ function toItem(r: NoteRecord): NoteItem {
     status: (r.category as NoteStatus) || 'draft',
     description: r.description,
     content: r.content,
+    contentFormat: r.content_format || 'markdown',
     tags: r.tags || [],
     source: r.difficulty || '',
     createdAt: r.created_at,
@@ -58,6 +60,7 @@ export async function createNote(title: string): Promise<string | null> {
       category: 'draft',
       description: '',
       content: '',
+      content_format: 'tiptap-json',
       tags: [],
       difficulty: '',
       reading_time: 0,
@@ -74,6 +77,7 @@ export async function updateNote(id: string, updates: {
   status?: NoteStatus;
   description?: string;
   content?: string;
+  content_format?: string;
   tags?: string[];
   source?: string;
 }): Promise<boolean> {
@@ -82,6 +86,7 @@ export async function updateNote(id: string, updates: {
   if (updates.status !== undefined) updateData.category = updates.status;
   if (updates.description !== undefined) updateData.description = updates.description;
   if (updates.content !== undefined) updateData.content = updates.content;
+  if (updates.content_format !== undefined) updateData.content_format = updates.content_format;
   if (updates.tags !== undefined) updateData.tags = updates.tags;
   if (updates.source !== undefined) updateData.difficulty = updates.source;
 

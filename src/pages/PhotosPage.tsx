@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase, type PhotoRecord } from '@/lib/supabase';
 import { generateCoverColors } from '@/lib/coverGenerator';
@@ -97,6 +98,10 @@ export default function PhotosPage() {
   }
 
   return (
+    <><Helmet>
+      <title>照片 — 大猪</title>
+      <meta name="description" content="日常照片" />
+    </Helmet>
     <main className="min-h-screen pt-20 pb-20">
       <div className="content-width">
         <div className="flex items-end justify-between mb-10">
@@ -174,5 +179,6 @@ export default function PhotosPage() {
         </AnimatePresence>
       </div>
     </main>
+  </>
   );
 }

@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getAllPosts, type BlogPost } from '@/hooks/useBlogPosts';
 import { useSupabaseEssays, createEssay, deleteEssay } from '@/hooks/useSupabaseEssays';
 import { useAuth } from '@/contexts/AuthContext';
 import DeleteConfirmModal from '@/components/DeleteConfirmModal';
@@ -12,9 +12,8 @@ const categoryLabel: Record<string, string> = {
   inspiration: '灵感',
 };
 
-function EssayCard({ post, index, onDelete }: { post: BlogPost | { slug: string; title: string; date: string; category: string; description: string; isSupabase?: boolean }; index: number; onDelete?: (slug: string) => void }) {
-  const slug = 'isSupabase' in post && post.isSupabase ? post.slug : (post as BlogPost).slug;
-  const isSupabase = 'isSupabase' in post && post.isSupabase;
+function EssayCard({ post, index, onDelete }: { post: { slug: string; title: string; date: string; category: string; description: string }; index: number; onDelete?: (slug: string) => void }) {
+  const slug = post.slug;
 
   return (
     <motion.div
@@ -41,7 +40,7 @@ function EssayCard({ post, index, onDelete }: { post: BlogPost | { slug: string;
             {post.description}
           </p>
         </Link>
-        {isSupabase && onDelete && (
+        {onDelete && (
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(slug); }}
             className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-lg bg-white border border-black/5 text-[#86868B] hover:text-red-500 hover:border-red-200 hover:bg-red-50 opacity-0 group-hover/card:opacity-100 transition-all duration-200"
@@ -134,15 +133,10 @@ function CreateModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
 export default function EssayListPage() {
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
-  const staticPosts = useMemo(() => getAllPosts(), []);
-  const { items: supabaseItems, loading, refresh } = useSupabaseEssays();
+  const { items: allEssays, loading, refresh } = useSupabaseEssays();
   const categories = useMemo(() => {
-    const allCats = [...new Set([
-      ...staticPosts.map((p) => p.category),
-      ...supabaseItems.map((p) => p.category),
-    ])];
-    return allCats;
-  }, [staticPosts, supabaseItems]);
+    return [...new Set(allEssays.map((p) => p.category))];
+  }, [allEssays]);
 
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [showCreate, setShowCreate] = useState(false);
@@ -150,21 +144,17 @@ export default function EssayListPage() {
   const [deleting, setDeleting] = useState(false);
   const [toast, setToast] = useState(false);
 
-  // Merge static + Supabase essays
   const allPosts = useMemo(() => {
-    const supabase: Array<{ slug: string; title: string; date: string; category: string; description: string; isSupabase: true }> = supabaseItems.map((e) => ({
-      slug: e.id,
-      title: e.title,
-      date: e.date,
-      category: e.category,
-      description: e.description,
-      isSupabase: true as const,
-    }));
-    // Deduplicate: static posts take priority
-    const staticSlugs = new Set(staticPosts.map((p) => p.slug));
-    const filteredSupabase = supabase.filter((e) => !staticSlugs.has(e.slug));
-    return [...staticPosts, ...filteredSupabase].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-  }, [staticPosts, supabaseItems]);
+    return allEssays
+      .map((e) => ({
+        slug: e.id,
+        title: e.title,
+        date: e.date,
+        category: e.category,
+        description: e.description,
+      }))
+      .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  }, [allEssays]);
 
   const filtered = activeCategory === 'all'
     ? allPosts
@@ -193,7 +183,12 @@ export default function EssayListPage() {
   }
 
   return (
-    <main className="min-h-screen pt-24 pb-24 bg-[#f5f5f7]">
+    <>
+      <Helmet>
+        <title>随笔 — 大猪</title>
+        <meta name="description" content="随笔与文章列表" />
+      </Helmet>
+      <main className="min-h-screen pt-24 pb-24 bg-[#f5f5f7]">
       <div className="content-width">
         {/* Header */}
         <div className="text-center mb-14">
@@ -264,12 +259,12 @@ export default function EssayListPage() {
 
         {/* List */}
         <div className="max-w-2xl mx-auto space-y-4">
-          {loading && supabaseItems.length === 0 && staticPosts.length === 0 ? (
+          {loading && allEssays.length === 0 ? (
             <p className="text-center text-[#86868B] text-[17px] py-16">加载中...</p>
           ) : (
             <AnimatePresence mode="wait">
               {filtered.map((post, i) => (
-                <EssayCard key={'slug' in post ? (post as BlogPost).slug : (post as { slug: string }).slug} post={post} index={i} onDelete={isAdmin ? handleDeleteOpen : undefined} />
+                <EssayCard key={post.slug} post={post} index={i} onDelete={isAdmin ? handleDeleteOpen : undefined} />
               ))}
             </AnimatePresence>
           )}
@@ -306,5 +301,6 @@ export default function EssayListPage() {
         </AnimatePresence>
       </div>
     </main>
+  </>
   );
 }

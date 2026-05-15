@@ -40,6 +40,7 @@ export interface NoteRecord {
   category: string;
   description: string;
   content: string;
+  content_format: string;
   tags: string[];
   difficulty: string;
   reading_time: number;
@@ -53,6 +54,7 @@ export interface EssayRecord {
   category: string;
   description: string;
   content: string;
+  content_format: string;
   created_at: string;
 }
 

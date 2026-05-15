@@ -1,4 +1,5 @@
 import { useMemo, useState, useCallback } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import AboutBackground from '@/components/about/AboutBackground';
 import AboutSection from '@/components/about/AboutSection';
@@ -111,6 +112,10 @@ export default function AboutPage() {
   const [timelineEditing, setTimelineEditing] = useState(false);
 
   return (
+    <><Helmet>
+      <title>关于 — 大猪</title>
+      <meta name="description" content="关于本站" />
+    </Helmet>
     <main className="relative min-h-screen bg-white overflow-hidden font-serif">
       <AboutBackground />
 
@@ -332,5 +337,6 @@ export default function AboutPage() {
         </div>
       </div>
     </main>
+  </>
   );
 }

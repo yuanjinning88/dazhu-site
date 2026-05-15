@@ -1,12 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { supabase, type NoteRecord } from '@/lib/supabase';
 import { type NoteItem, type NoteStatus, STATUS_LABEL, STATUS_STYLE, updateNote } from '@/hooks/useSupabaseNotes';
+import RichTextEditor from '@/components/editor/RichTextEditor';
 
 function toItem(r: NoteRecord): NoteItem {
   return {
@@ -15,6 +12,7 @@ function toItem(r: NoteRecord): NoteItem {
     status: (r.category as NoteStatus) || 'draft',
     description: r.description,
     content: r.content,
+    contentFormat: r.content_format || 'markdown',
     tags: r.tags || [],
     source: r.difficulty || '',
     createdAt: r.created_at,
@@ -34,7 +32,7 @@ export default function NotesEditPage() {
   const [source, setSource] = useState('');
   const [description, setDescription] = useState('');
   const [content, setContent] = useState('');
-  const [preview, setPreview] = useState(false);
+  const [contentFormat, setContentFormat] = useState('markdown');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -50,6 +48,7 @@ export default function NotesEditPage() {
         setSource(n.source);
         setDescription(n.description);
         setContent(n.content);
+        setContentFormat(n.contentFormat || 'markdown');
       }
       setLoading(false);
     });
@@ -62,10 +61,19 @@ export default function NotesEditPage() {
       .split(/[,，]/)
       .map((t) => t.trim())
       .filter(Boolean);
-    const ok = await updateNote(id, { title, status, description, content, tags, source: source.trim() });
+    const ok = await updateNote(id, {
+      title,
+      status,
+      description,
+      content,
+      content_format: 'tiptap-json',
+      tags,
+      source: source.trim(),
+    });
     setSaving(false);
     if (ok) {
       setSaved(true);
+      setContentFormat('tiptap-json');
       setTimeout(() => setSaved(false), 2000);
     }
   }
@@ -117,20 +125,6 @@ export default function NotesEditPage() {
                   保存成功
                 </motion.span>
               )}
-              <div className="flex items-center bg-white rounded-lg border border-black/10 p-0.5">
-                <button
-                  onClick={() => setPreview(false)}
-                  className={`px-3 py-1.5 text-[13px] font-medium rounded-md transition-all duration-200 ${!preview ? 'bg-[#1d1d1f] text-white' : 'text-[#86868B] hover:text-[#1d1d1f]'}`}
-                >
-                  编辑
-                </button>
-                <button
-                  onClick={() => setPreview(true)}
-                  className={`px-3 py-1.5 text-[13px] font-medium rounded-md transition-all duration-200 ${preview ? 'bg-[#1d1d1f] text-white' : 'text-[#86868B] hover:text-[#1d1d1f]'}`}
-                >
-                  预览
-                </button>
-              </div>
               <button
                 onClick={handleSave}
                 disabled={saving}
@@ -205,63 +199,13 @@ export default function NotesEditPage() {
             </div>
           </div>
 
-          {/* Editor / Preview */}
-          {preview ? (
-            <div className="bg-white rounded-xl border border-black/5 p-10 min-h-[500px]">
-              <div className="prose max-w-none
-                prose-p:text-[16px] prose-p:text-[#1d1d1f] prose-p:leading-[1.55]
-                prose-headings:text-[#1d1d1f] prose-headings:font-semibold
-                prose-h2:text-[22px] prose-h2:mt-10 prose-h2:mb-3
-                prose-h3:text-[18px] prose-h3:mt-8 prose-h3:mb-2
-                prose-a:text-[#0066cc] prose-a:no-underline
-                prose-strong:text-[#1d1d1f]
-                prose-code:text-[14px] prose-code:text-[#6E6E73] prose-code:before:content-none prose-code:after:content-none prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:bg-[#f5f5f7] prose-code:font-medium
-                prose-pre:p-0 prose-pre:bg-transparent
-                prose-li:text-[16px] prose-li:text-[#1d1d1f]
-                prose-blockquote:border-l-[#0066cc] prose-blockquote:text-[#86868B]
-                prose-hr:border-black/5
-                prose-img:rounded-xl
-              ">
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  components={{
-                    code({ className, children, ...rest }) {
-                      const match = /language-(\w+)/.exec(className || '');
-                      const codeStr = String(children).replace(/\n$/, '');
-                      if (match) {
-                        return (
-                          <SyntaxHighlighter
-                            style={oneDark}
-                            language={match[1]}
-                            PreTag="div"
-                            customStyle={{
-                              margin: 0,
-                              borderRadius: '0.75rem',
-                              background: '#1a1a1a',
-                              fontSize: '0.875rem',
-                            }}
-                          >
-                            {codeStr}
-                          </SyntaxHighlighter>
-                        );
-                      }
-                      return <code className="px-1.5 py-0.5 rounded-md bg-[#f5f5f7] text-[#6E6E73] text-[14px] font-medium" {...rest}>{children}</code>;
-                    },
-                  }}
-                >
-                  {content || '*暂无内容*'}
-                </ReactMarkdown>
-              </div>
-            </div>
-          ) : (
-            <textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              className="w-full min-h-[500px] bg-white rounded-xl border border-black/5 p-10 text-[16px] text-[#1d1d1f] leading-[1.55] resize-y outline-none focus:border-[#0066cc]/30 focus:shadow-sm transition-all placeholder:text-[#86868B]/50"
-              placeholder="开始写作...（支持 Markdown）"
-              autoFocus
-            />
-          )}
+          {/* Rich Text Editor */}
+          <RichTextEditor
+            content={content}
+            contentFormat={contentFormat}
+            onChange={setContent}
+            placeholder="开始记录..."
+          />
         </motion.div>
       </div>
     </main>

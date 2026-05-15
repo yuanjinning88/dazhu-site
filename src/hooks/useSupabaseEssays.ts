@@ -8,6 +8,7 @@ export interface EssayItem {
   category: string;
   description: string;
   content: string;
+  contentFormat: string;
   createdAt: string;
 }
 
@@ -19,6 +20,7 @@ function toItem(r: EssayRecord): EssayItem {
     category: r.category,
     description: r.description,
     content: r.content,
+    contentFormat: r.content_format || 'markdown',
     createdAt: r.created_at,
   };
 }
@@ -67,6 +69,7 @@ export async function createEssay(title: string): Promise<{ id: string } | { err
       category: 'life',
       description: '',
       content: '',
+      content_format: 'tiptap-json',
     })
     .select('id')
     .single();
@@ -92,6 +95,7 @@ export async function updateEssay(id: string, updates: {
   category?: string;
   description?: string;
   content?: string;
+  content_format?: string;
 }): Promise<{ ok: true } | { error: string }> {
   const { error } = await supabase
     .from('essays')

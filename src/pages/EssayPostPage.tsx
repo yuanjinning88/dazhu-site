@@ -1,11 +1,9 @@
-import { useMemo } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import { getPost } from '@/hooks/useBlogPosts';
 import { useSupabaseEssay } from '@/hooks/useSupabaseEssays';
 import { useAuth } from '@/contexts/AuthContext';
+import RichTextRenderer from '@/components/editor/RichTextRenderer';
 
 const categoryLabel: Record<string, string> = {
   life: '生活',
@@ -16,15 +14,11 @@ const categoryLabel: Record<string, string> = {
 export default function EssayPostPage() {
   const { slug } = useParams<{ slug: string }>();
   const { isAdmin } = useAuth();
-  const staticPost = useMemo(() => (slug ? getPost(slug) : undefined), [slug]);
-  const { essay: supabasePost, loading } = useSupabaseEssay(slug);
+  const { essay, loading } = useSupabaseEssay(slug);
 
-  // Prefer Supabase (editable), fallback to static
-  const post = supabasePost
-    ? { title: supabasePost.title, date: supabasePost.date, category: supabasePost.category, description: supabasePost.description, content: supabasePost.content, isSupabase: true, id: supabasePost.id }
-    : staticPost
-      ? { ...staticPost, isSupabase: false, id: '' }
-      : null;
+  const post = essay
+    ? { title: essay.title, date: essay.date, category: essay.category, description: essay.description, content: essay.content, contentFormat: essay.contentFormat, id: essay.id }
+    : null;
 
   if (!post && !loading) {
     return (
@@ -48,7 +42,12 @@ export default function EssayPostPage() {
   if (!post) return null;
 
   return (
-    <main className="min-h-screen pt-24 pb-24 bg-white">
+    <>
+      <Helmet>
+        <title>{post.title ? `${post.title} — 大猪` : '大猪'}</title>
+        <meta name="description" content={post.description || '随笔文章'} />
+      </Helmet>
+      <main className="min-h-screen pt-24 pb-24 bg-white">
       <div className="content-width">
         <motion.article
           className="max-w-2xl mx-auto"
@@ -65,7 +64,7 @@ export default function EssayPostPage() {
               返回随笔列表
             </Link>
 
-            {post.isSupabase && isAdmin && (
+            {isAdmin && post.id && (
               <Link
                 to={`/essays/${post.id}/edit`}
                 className="px-4 py-2 rounded-full bg-[#0066cc] text-white text-[14px] font-medium hover:bg-[#0071e3] transition-colors active:scale-[0.97]"
@@ -102,9 +101,10 @@ export default function EssayPostPage() {
             prose-hr:border-black/5
             prose-img:rounded-2xl
           ">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {post.content}
-            </ReactMarkdown>
+            <RichTextRenderer
+              content={post.content}
+              contentFormat={post.contentFormat || 'markdown'}
+            />
           </div>
         </motion.article>
 
@@ -119,5 +119,6 @@ export default function EssayPostPage() {
         </div>
       </div>
     </main>
+  </>
   );
 }
