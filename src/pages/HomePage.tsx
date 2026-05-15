@@ -52,7 +52,9 @@ const typeColors: Record<string, string> = {
   note: 'text-emerald-500',
 };
 
-const bgImages = Array.from({ length: 12 }, (_, i) => `/images/bg/bg-${String(i + 1).padStart(2, '0')}.png`);
+// Dynamically discover all background images at build time
+const bgModules = import.meta.glob('@/assets/bg/*.{png,jpg,jpeg,webp,avif}', { eager: true, import: 'default' }) as Record<string, string>;
+const bgImages = Object.values(bgModules);
 
 export default function HomePage() {
   const { items: music } = useMusic();
