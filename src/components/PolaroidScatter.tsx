@@ -447,7 +447,7 @@ function LightboxModal({ photo, onClose }: { photo: PolaroidPhoto; onClose: () =
 export default function PolaroidScatter({ photos }: { photos: PolaroidPhoto[] }) {
   const [viewPhoto, setViewPhoto] = useState<PolaroidPhoto | null>(null);
   const spots = useMemo(() => scatter(photos), [photos.map(p => p.id).join()]);
-  const minHeight = Math.max(580, photos.length * 230 + 340);
+  const minHeight = Math.max(380, photos.length * 120 + 260);
 
   if (photos.length === 0) return <p className="text-sm text-text-muted">暂无日常碎片</p>;
 
@@ -459,8 +459,8 @@ export default function PolaroidScatter({ photos }: { photos: PolaroidPhoto[] })
       <PaperFilter />
 
       <div className="polaroid-book" style={{
-        transform: 'perspective(900px) rotateX(-2.5deg) rotateY(-0.8deg) translateZ(0)',
-        transformOrigin: 'center center',
+        transform: 'perspective(500px) rotateX(8deg) rotateY(-1deg) translateZ(0)',
+        transformOrigin: 'center bottom',
         filter: 'drop-shadow(10px 14px 32px rgba(0,0,0,0.13)) drop-shadow(18px 22px 64px rgba(0,0,0,0.07)) drop-shadow(4px 6px 10px rgba(0,0,0,0.06))',
       }}>
         <div className="flex overflow-hidden" style={{ minHeight: `${minHeight}px`, borderRadius: '8px' }}>
