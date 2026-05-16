@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase, type PhotoRecord } from '@/lib/supabase';
 import { generateCoverColors } from '@/lib/coverGenerator';
 import { useAuth } from '@/contexts/AuthContext';
+import { uploadImage } from '@/components/editor/utils/uploadImage';
 import Icon from '@/components/icons';
 import DeleteConfirmModal from '@/components/DeleteConfirmModal';
 
@@ -18,7 +19,24 @@ interface PhotoItem {
 function AddPhotoForm({ onClose, onAdded }: { onClose: () => void; onAdded: () => void }) {
   const [form, setForm] = useState({ title: '', date: '', imageUrl: '' });
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setError('');
+    try {
+      const url = await uploadImage(file);
+      setForm(prev => ({ ...prev, imageUrl: url }));
+    } catch (err: any) {
+      setError(`上传失败：${err.message || '未知错误'}`);
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -47,12 +65,42 @@ function AddPhotoForm({ onClose, onAdded }: { onClose: () => void; onAdded: () =
         <div className="space-y-3">
           <input className="w-full px-3 py-2 rounded-lg border border-border text-sm" placeholder="标题 *" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
           <input className="w-full px-3 py-2 rounded-lg border border-border text-sm" placeholder="日期（如 2026-05）" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
-          <input className="w-full px-3 py-2 rounded-lg border border-border text-sm" placeholder="图片链接（粘贴 URL，选填）" value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} />
+          <div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+            {form.imageUrl ? (
+              <div className="relative rounded-lg overflow-hidden border border-border">
+                <img src={form.imageUrl} alt="预览" className="w-full h-32 object-cover" />
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, imageUrl: '' })}
+                  className="absolute top-1 right-1 w-6 h-6 flex items-center justify-center rounded-full bg-black/50 text-white text-xs hover:bg-black/70"
+                >
+                  ✕
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="w-full px-3 py-4 rounded-lg border-2 border-dashed border-border text-sm text-text-muted hover:border-accent hover:text-accent transition-colors disabled:opacity-50"
+              >
+                {uploading ? '上传中...' : '📷 选择本地图片（选填）'}
+              </button>
+            )}
+          </div>
+          <input className="w-full px-3 py-2 rounded-lg border border-border text-sm" placeholder="或粘贴图片链接 URL" value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} />
         </div>
         {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
         <div className="flex gap-3 mt-4">
           <button type="button" onClick={onClose} className="flex-1 py-2 rounded-lg border border-border text-sm text-text-muted">取消</button>
-          <button type="submit" disabled={saving} className="flex-1 py-2 rounded-lg bg-accent text-white text-sm font-medium disabled:opacity-50">{saving ? '保存中...' : '添加'}</button>
+          <button type="submit" disabled={saving || uploading} className="flex-1 py-2 rounded-lg bg-accent text-white text-sm font-medium disabled:opacity-50">{saving ? '保存中...' : '添加'}</button>
         </div>
       </motion.form>
     </motion.div>
