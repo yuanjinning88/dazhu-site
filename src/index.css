@@ -57,6 +57,17 @@
   .content-width {
     @apply mx-auto max-w-content px-5 md:px-8;
   }
+
+  /* Polaroid card — GPU-accelerated hover (separate from rotation wrapper) */
+  .polaroid-card {
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    will-change: transform;
+  }
+
+  .polaroid-card:hover {
+    transform: translateY(-14px) scale(1.06);
+    z-index: 50;
+  }
 }
 
 @keyframes wave-move {
