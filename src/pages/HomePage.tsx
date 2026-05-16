@@ -10,6 +10,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { getRandomQuote } from '@/data/quotes';
 import { supabase, type PhotoRecord } from '@/lib/supabase';
+import PolaroidScatter from '@/components/PolaroidScatter';
 
 function SectionHeader({ title, href }: { title: string; href: string }) {
   return (
@@ -293,26 +294,7 @@ export default function HomePage() {
       <SectionWrapper>
         <div className="content-width">
           <SectionHeader title="日常碎片" href="/photos" />
-          {latestPhotos.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {latestPhotos.map((item, i) => (
-                <motion.div key={item.id} custom={i} initial="hidden" whileInView="show" viewport={{ once: true }} variants={cardReveal}>
-                  <div className="group cursor-pointer">
-                    {item.imageUrl ? (
-                      <div className="aspect-square rounded-2xl mb-2 overflow-hidden transition-transform duration-300 group-hover:scale-[1.02]">
-                        <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
-                      </div>
-                    ) : (
-                      <div className="aspect-square rounded-2xl mb-2 transition-transform duration-300 group-hover:scale-[1.02]" style={{ background: `linear-gradient(135deg, ${item.colors[0]}, ${item.colors[1]})` }} />
-                    )}
-                    <p className="text-xs text-text-muted">{item.title}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-text-muted">暂无日常碎片</p>
-          )}
+          <PolaroidScatter photos={latestPhotos} />
         </div>
       </SectionWrapper>
     </main>
